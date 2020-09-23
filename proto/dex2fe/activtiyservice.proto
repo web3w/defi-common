@@ -4,7 +4,7 @@ package dfe;
 
 // ** Please Read README.md for the Conventions **
 
-option go_package = "github.com/gisvr/deif-common/proto/dex2fe";
+option go_package = "github.com/gisvr/defi-common/proto/dex2fe";
 
 import "google/api/annotations.proto";
 import "rpcoptions.proto";

@@ -1,9 +1,9 @@
 package orderbook
 
 import (
-	"github.com/gisvr/deif-common/dbdata/trade"
-	pb "github.com/gisvr/deif-common/proto/dex2"
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/dbdata/trade"
+	pb "github.com/gisvr/defi-common/proto/dex2"
+	"github.com/gisvr/defi-common/utils/ulog"
 	rbt "github.com/emirpasic/gods/trees/redblacktree"
 )
 

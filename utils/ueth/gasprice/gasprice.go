@@ -1,9 +1,9 @@
 package gasprice
 
 import (
-	"github.com/gisvr/deif-common/utils/ubig"
-	"github.com/gisvr/deif-common/utils/ulog"
-	"github.com/gisvr/deif-common/utils/utime"
+	"github.com/gisvr/defi-common/utils/ubig"
+	"github.com/gisvr/defi-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/utime"
 	"math/big"
 	"sync"
 	"sync/atomic"

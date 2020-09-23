@@ -2,8 +2,8 @@ package dexinit
 
 import (
 	"bytes"
-	"github.com/gisvr/deif-common/utils/ucfg"
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/ucfg"
+	"github.com/gisvr/defi-common/utils/ulog"
 	"io/ioutil"
 	"os"
 	"path"

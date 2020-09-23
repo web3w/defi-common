@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-	"github.com/gisvr/deif-common/utils/unuls/btcec"
+	"github.com/gisvr/defi-common/utils/unuls/btcec"
 	"golang.org/x/crypto/ripemd160"
 )
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gisvr/deif-common/utils/ucfg"
-	"github.com/gisvr/deif-common/utils/ucfg/example/foo"
+	"github.com/gisvr/defi-common/utils/ucfg"
+	"github.com/gisvr/defi-common/utils/ucfg/example/foo"
 	"github.com/spf13/viper"
 )
 

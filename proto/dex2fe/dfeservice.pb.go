@@ -6,7 +6,7 @@ package dex2fe
 import (
 	context "context"
 	fmt "fmt"
-	dex2 "github.com/gisvr/deif-common/proto/dex2"
+	dex2 "github.com/gisvr/defi-common/proto/dex2"
 	proto "github.com/golang/protobuf/proto"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"

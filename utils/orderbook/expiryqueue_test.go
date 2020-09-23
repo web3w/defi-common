@@ -3,7 +3,7 @@ package orderbook
 import (
 	"testing"
 
-	"github.com/gisvr/deif-common/utils/utest"
+	"github.com/gisvr/defi-common/utils/utest"
 )
 
 type ExpiryQueueTest struct {

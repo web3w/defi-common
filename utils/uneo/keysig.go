@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/ulog"
 	"github.com/CityOfZion/neo-go/pkg/crypto"
 	"math/big"
 )

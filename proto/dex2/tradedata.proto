@@ -5,7 +5,7 @@ syntax = "proto3";
 
 package dex;
 
-option go_package = "github.com/gisvr/deif-common/proto/dex2";
+option go_package = "github.com/gisvr/defi-common/proto/dex2";
 
 message Depth {
   string cash_token_id = 1;

@@ -1,7 +1,7 @@
 package utest_test
 
 import (
-	"github.com/gisvr/deif-common/utils/utest"
+	"github.com/gisvr/defi-common/utils/utest"
 	"testing"
 )
 

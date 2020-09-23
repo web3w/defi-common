@@ -1,8 +1,8 @@
 package dexinit
 
 import (
-	"github.com/gisvr/deif-common/utils/ueth"
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/ueth"
+	"github.com/gisvr/defi-common/utils/ulog"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"

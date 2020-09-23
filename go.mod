@@ -1,4 +1,4 @@
-module github.com/gisvr/deif-common
+module github.com/gisvr/defi-common
 
 require (
 	github.com/CityOfZion/neo-go v0.60.0

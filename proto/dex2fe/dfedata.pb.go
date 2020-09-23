@@ -5,7 +5,7 @@ package dex2fe
 
 import (
 	fmt "fmt"
-	dex2 "github.com/gisvr/deif-common/proto/dex2"
+	dex2 "github.com/gisvr/defi-common/proto/dex2"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
 )

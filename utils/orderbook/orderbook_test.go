@@ -1,15 +1,15 @@
 package orderbook_test
 
 import (
-	"github.com/gisvr/deif-common/dbdata/trade"
+	"github.com/gisvr/defi-common/dbdata/trade"
 	"testing"
 	"time"
 
-	pb "github.com/gisvr/deif-common/proto/dex2"
-	"github.com/gisvr/deif-common/utils/numeric"
-	"github.com/gisvr/deif-common/utils/orderbook"
-	"github.com/gisvr/deif-common/utils/utest"
-	"github.com/gisvr/deif-common/utils/utime"
+	pb "github.com/gisvr/defi-common/proto/dex2"
+	"github.com/gisvr/defi-common/utils/numeric"
+	"github.com/gisvr/defi-common/utils/orderbook"
+	"github.com/gisvr/defi-common/utils/utest"
+	"github.com/gisvr/defi-common/utils/utime"
 )
 
 type OrderBookTest struct {

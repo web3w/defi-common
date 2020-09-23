@@ -2,8 +2,8 @@ package foo
 
 import (
 	"fmt"
-	"github.com/gisvr/deif-common/utils/ucfg"
-	"github.com/gisvr/deif-common/utils/ucfg/example/bar"
+	"github.com/gisvr/defi-common/utils/ucfg"
+	"github.com/gisvr/defi-common/utils/ucfg/example/bar"
 	"github.com/spf13/viper"
 )
 

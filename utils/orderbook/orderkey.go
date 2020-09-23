@@ -1,7 +1,7 @@
 package orderbook
 
 import (
-	"github.com/gisvr/deif-common/dbdata/trade"
+	"github.com/gisvr/defi-common/dbdata/trade"
 )
 
 // The key of an order is <price, orderId>.

@@ -1,7 +1,7 @@
 package dbtrade
 
 import (
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/ulog"
 	"strings"
 )
 

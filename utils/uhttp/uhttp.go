@@ -1,7 +1,7 @@
 package uhttp
 
 import (
-	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/defi-common/utils/ulog"
 	"io/ioutil"
 	"net/http"
 	"net/url"
