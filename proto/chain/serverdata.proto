@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package chain;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/chain";
+
+// Must be synced with `PlaceOrderRequest`.
+message Order {
+
+    int64 order_id = 1;
+
+    string trader = 2;
+
+    string user_from = 3;
+
+    int32 action = 4;
+
+    int32 type = 5;
+
+    int64 stock_token_id = 6;
+    string stock_token_symbol = 7; // e.g. "ADX"
+
+    int64 cash_token_id = 8;
+    string cash_token_symbol = 9; // e.g. "ETH"
+
+    // How many cash tokens that 1e8 stock tokens is worth at this price.
+    uint64 price_e8 = 10;
+
+    // The total amount (multiplied by 1e8) of stock token to buy/sell.
+    uint64 amount_total_e8 = 11;
+    uint64 amount_left_e8 = 12;
+
+    uint64 accumulated_fund_e8 = 13;
+
+    string order_sign = 14;
+
+    // Do NOT use create time to check which order is accepted earlier. Use order id instead.
+    int64 create_time = 15;
+    int64 update_time = 16;
+    int64 expire_time = 17;
+
+    int32 status = 18;
+}
+
+// 币种对： coin_pair表。
+message CoinPair {
+    int64 id = 1;
+    int64 cash_token_id = 2;
+    string cash_token_symbol = 3;
+    int64 stock_token_id = 4;
+    string stock_token_symbol = 5;
+    string chain_token = 6;
+    int32 valid_decimals = 7;
+    int64 order_min_amount_e8 = 8;
+    int64 order_min_value_e8 = 9;
+    int32 status = 10;
+    int64 create_time = 11;
+    int64 update_time = 12;
+}

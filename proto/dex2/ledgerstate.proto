@@ -1,0 +1,206 @@
+// Notes:
+// - Address are in hex form with "0x" prefix, e.g. "0x1B38C16a23269Ef3D776A16B46b0f2f160Fcf7FC".
+
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+// LedgerState is a normalized representation of a ledger. Every field of the ledger can be
+// retrieved or derived from the LedgerState message.
+message LedgerState {
+  // The version of the state machine by which this ledger state is generated.
+  //
+  // Sanity check - before loading a LedgerState message, the program must check that the state
+  // machine in use has extactly the same version to the message.
+  LedgerVersion version = 1;
+
+  // The last commit index. 0 for a fresh ledger, i.e. the first commit has index 1.
+  int64 commit_index = 2;
+
+  // The last event index. 0 for a fresh ledger, i.e. the first event has index 1.
+  int64 event_index = 3;
+
+  // The ledger-wise logic time. Must push forward this time with the timestamp of every
+  // non-readonly request before executing the request itself.
+  int64 logic_time_ms = 4;
+
+  // The states of the market in the ledger. Nil before a market is created.
+  MarketState market_state = 5;
+}
+
+message LedgerVersion {
+  // Different major versions are incompatible to each other.
+  int32 major = 1;
+
+  // Within a major version, minor versions are backward compatible.
+  int32 minor = 2;
+}
+
+// MarketState is a normalized representation of a market. Every field of the market can be
+// retrieved or derived from the MarketState message.
+message MarketState {
+  string market_addr = 1;
+
+  // Label on the market;
+  MarketLabel label = 2;
+
+  // Config of the market.
+  MarketConfig config = 4;
+
+  // Next order id.
+  int64 next_order_id = 5;
+
+  // Index of the last added deposit. The first deposit has index 1.
+  int64 last_deposit_index = 6;
+
+  // The states of all non-empty accounts in the market.
+  repeated AccountState accounts = 7;
+
+  // All active orders in the market (includes pending orders but NOT inactive orders).
+  repeated Order orders = 8;
+}
+
+// MarketConfig
+message MarketConfig {
+  uint64 maker_fee_rate_e4 = 1;  // e.g. 10 means 10 / 1e4 = 0.001
+  uint64 taker_fee_rate_e4 = 2;
+  uint64 withdraw_fee_rate_e4 = 3;  // does not affect the off-chain balances
+
+  // The tokens that are can be used as cash in this market.
+  repeated TokenInfo cash_tokens = 5;
+
+  // The tokens that can be traded as stock in this market.
+  repeated TokenInfo stock_tokens = 6;
+
+  // The tokens that can neither be used as cash, nor be used as stock.
+  repeated TokenInfo disabled_tokens = 7;
+}
+
+message TokenInfo {
+  string token_id = 1;  // e.g., "ETH", "ADX"
+  uint32 token_code = 2;  // 0 is always ETH.
+  string token_addr = 3;  // ERC20 token address
+  uint64 scale_factor = 4;
+}
+
+// Labels for marking markets.
+enum MarketLabel {
+  NoneLabel = 0;
+
+  // The main market on Ethereum.
+  EthMain = 1;
+}
+
+// AccountState is a normalized representation of an account. Every field of the account can be
+// retrieved or derived from the account state and the orders belong to the account.
+//
+// NOTE: the fields and the documentation are tentative.
+message AccountState {
+  string trader_addr = 1;
+
+  repeated TokenBalance balances = 2;
+
+  // The nonce of the last executed request of this trader.
+  //
+  // Every request that needs trader's signature must have a nonce larger than this field. After
+  // a request has been executed, this field will be replaced with the nonce of the request. This is
+  // to ensure that a signed request cannot be executed more than once.
+  int64 nonce = 10;
+}
+
+message TokenBalance {
+  // This id of this token.
+  string token_id = 1;
+
+  // The total amount (multiplied by 1e8), including the locked part, NOT including the pending withdraw.
+  uint64 total_e8 = 2;
+
+  // The amount (multiplied by 1e8) locked due to, for example, having active orders. This part
+  // will be subtracted from the quota of withdrawing and placing new orders.
+  uint64 locked_e8 = 3;
+}
+
+// Must be synced with `PlaceOrderRequest`.
+message Order {
+
+  enum Action {
+    UnknownAction = 0;
+    Buy = 1;
+    Sell = 2;
+  }
+
+  // Transition:
+  //           Pending  =>        Unfilled | Rejected
+  //          Unfilled  => PartiallyFilled | Cancelled | Expired
+  //   PartiallyFilled  =>          Filled | PartiallyCancelled | PartiallyExpired
+  enum Status {
+    UnknownStatus = 0;
+
+    //--- active status: ---
+    // (`Pending` status is NOT supported yet, new orders directly become `Unfilled`.)
+    // Pending = 1;  // Not added to the orderbook yet. Cannot be cancelled directly.
+
+    Unfilled = 2;
+    PartiallyFilled = 3;
+
+    //--- inactive status: ---
+    Rejected = 4;
+    Filled = 5;
+    Cancelled = 6;  // the result of cancelling an unfilled order
+    PartiallyCancelled = 7;  // the result of cancelling a partially filled order
+    Expired = 8;  // the result that an unfilled order expired
+    PartiallyExpired = 9;  // the result that a partially filled order expired
+  }
+
+  //----------------------------- Constant Fields ----------------------------------------
+
+  // The id of the order, which is a positive value. An earlier order has a lower id.
+  int64 order_id = 1;
+  string trader_addr = 2;
+
+  Action action = 3;
+
+  // The token used as "cash", which is used to buy/sell the stock token.
+  //
+  // The id of a trade pair has format <cash_token_id>_<stock_token_id>, e.g. "ETH_ADX".
+  string cash_token_id = 4; // e.g. "ETH"
+  string stock_token_id = 5; // e.g. "ADX"
+
+  // How many cash tokens that 1e8 stock tokens is worth at this price.
+  uint64 price_e8 = 6;
+
+  // The total amount (multiplied by 1e8) of stock token to buy/sell.
+  uint64 amount_total_e8 = 7;
+
+  // Do NOT use create time to check which order is accepted earlier. Use order id instead.
+  int64 create_time_ms = 8;
+
+  int64 expire_time_sec = 9;
+
+  // Any portion of an Immediate-Or-Cancel order that cannot be filled immediately is cancelled. A
+  // partial fulfillment is possible.
+  //
+  // TODO: support this.
+  bool ioc = 10;
+
+  // The nonce of the request that placed this order. See the file comment of tradeservice.proto
+  // about nonce.
+  int64 nonce = 11;
+
+  // A the result of Sign(hash, privKey) in the 65-byte [R || S || V] format where V is 0 or 1.
+  bytes sig = 12;
+
+  //----------------------------- Changing Fields ----------------------------------------
+
+  // The amount (multiplied by 1e8) left for trading. 0 means the order has been fully filled.
+  uint64 amount_left_e8 = 13;
+  Status status = 14;
+  int64 update_time_ms = 15;
+  // The accumulated amount of executed cash amount (multiplied by 1e8).
+  uint64 accumulated_fund_e8 = 16;
+
+  int64 book_id = 17;
+  string user_from = 18;
+}

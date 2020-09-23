@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+import "userdata.proto";
+
+service UserService {
+
+    // authenticate with user credentials
+    rpc Authenticate (AuthenticateRequest) returns (AuthenticateResponse);
+
+    // get user login log
+    rpc GetUserLog (GetUserLogRequest) returns (GetUserLogResponse);
+
+    // 获取JWT token签名需要的信息，用于校验。
+    rpc GetVerifierKey (GetVerifierKeyRequest) returns (GetVerifierKeyResponse);
+
+}
+
+//----------------------------- Authenticate -------------------------------------
+message AuthenticateRequest {
+    string uid = 1;
+
+    // 账户(EOS)或者地址(ETH)
+    string trader = 2;
+    // 所属网络：ETH或EOS。
+    string chain = 3;
+    // 用户来源： 登陆签名工具名称。
+    string user_from = 4;
+
+    string sig = 5;
+
+    // 签名时提示的超时时间。
+    int64 expire = 6;
+
+    string ua = 7;
+
+    string ip = 8;
+
+    string device = 9; // 设备web、iphone、android
+
+    string auth_type = 10; //钱包类型Dapp plug QR
+}
+
+message AuthenticateResponse {
+    string token = 1;
+}
+
+//----------------------------- GetUserLog ------------------------------------------
+
+// Exactly one of the these fields should be set. `email` takes precedence if both are set.
+message GetUserLogRequest {
+    string trader = 1;
+    int32 action = 2;
+}
+
+message GetUserLogResponse {
+    repeated UserLog userLog = 1;
+}
+
+//----------------------------- GetVerifierKey -----------------------------------
+message GetVerifierKeyRequest {
+}
+
+message GetVerifierKeyResponse {
+    string key = 1;
+}

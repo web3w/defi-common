@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+// 用户信息。
+message UserInfo{
+    int64 id = 1;
+    string trader = 2;
+    string chain = 3;
+    string user_from = 4;
+    int64 create_time = 5;
+    int64 update_time = 6;
+}
+
+// 用户操作记录。
+message UserLog {
+    int64 id = 1;
+    string uid = 2;
+    string trader = 3;
+    string chain = 4;
+    string user_from = 5;
+    int32 action = 6;
+    string sig = 7;
+    int64 create_time = 8;
+}
+
+// 用户Session 记录
+message UserSession {
+    int64 id = 1;
+    int32 enabled = 2;
+    int64 create_time =3;
+    string tid = 4;
+    string ua = 5;
+    string ip = 6;
+    string sub = 7;
+    int64 expire_time = 8;
+}
+
+//string trader = 2;
+//    string chain = 3;
+//    int64 expire = 4;

@@ -1,0 +1,944 @@
+syntax = "proto3";
+
+package dfe;
+
+// ** Please Read README.md for the Conventions **
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2fe";
+
+import "google/api/annotations.proto";
+import "git.bibox.com/dextop/common.git/proto/dex2/ledgerstate.proto";
+import "dfedata.proto";
+import "rpcoptions.proto";
+
+service DfeService {
+    //-------------------------- User Action ------------------------------------
+
+    rpc UserActionRecord (UserActionRequest) returns (UserActionResponse) {
+        option (google.api.http) = {
+            post: "/v1/useraciton"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+
+    // Get information of the DEx market.
+    // 每次可以获取某个指定链的配置，返回时处理为各个交易区。
+    rpc GetMarket (GetMarketRequest) returns (GetMarketResponse) {
+        option (google.api.http) = {
+            get: "/v1/market"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get trading config of the market.
+    rpc GetTradingConfig (GetTradingConfigRequest) returns (GetTradingConfigResponse) {
+        option (google.api.http) = {
+            get: "/v1/tradingconfig"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get information of trading pairs with the given cash token id.
+    rpc GetPairsByCash (GetPairsByCashRequest) returns (GetPairsByCashResponse) {
+        option (google.api.http) = {
+            get: "/v1/pairlist/{cash_token_id}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get metadata of token with the given token id. if token id is not pass, return all token metadata
+    // metadata include: tags, description, initPrice, totalAmount, circulation, website etc.
+    rpc GetTokenMetadata (GetTokenMetadataRequest) returns (GetTokenMetadataResponse) {
+        option (google.api.http) = {
+            get: "/v1/tokenmeta"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get information of a trading pair.
+    rpc GetPairInfo (GetPairInfoRequest) returns (GetPairInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/pairinfo/{pair_id}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get the current depth of a trading pair.
+    rpc GetDepth (GetDepthRequest) returns (GetDepthResponse) {
+        option (google.api.http) = {
+            get: "/v1/depth/{pair_id}/{size}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get the balances of all tokens of the current trader address.
+    rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse) {
+        option (google.api.http) = {
+            get: "/v1/balances/{trader_addr}"
+            additional_bindings { get: "/v1/balances" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Get the active orders of the current trader address.
+    rpc GetActiveOrders (GetActiveOrdersRequest) returns (GetActiveOrdersResponse) {
+        option (google.api.http) = {
+            get: "/v1/activeorders/{trader_addr}/{pair_id}/{size}/{page}"
+            additional_bindings { get: "/v1/activeorders/{pair_id}/{size}/{page}" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Get the past (i.e. no long active) orders of the current trader address.
+    rpc GetPastOrders (GetPastOrdersRequest) returns (GetPastOrdersResponse) {
+        option (google.api.http) = {
+            get: "/v1/pastorders/{trader_addr}/{pair_id}/{size}/{page}"
+            additional_bindings { get: "/v1/pastorders/{pair_id}/{size}/{page}" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Get order via order id.
+    rpc GetOrderById (GetOrderByIdRequest) returns (GetOrderByIdResponse) {
+        option (google.api.http) = {
+            get: "/v1/orderbyid/{trader_addr}/{order_id}"
+            additional_bindings { get: "/v1/orderbyid/{order_id}" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Get trade records of the current trader address.
+    rpc GetTrades (GetTradesRequest) returns (GetTradesResponse) {
+        option (google.api.http) = {
+            get: "/v1/trades/{trader_addr}/{pair_id}/{size}"
+            additional_bindings { get: "/v1/trades/{pair_id}/{size}" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Get order execution history. This is NOT specific to a trader.
+    rpc GetTradeHistory (GetTradeHistoryRequest) returns (GetTradeHistoryResponse) {
+        option (google.api.http) = {
+            get: "/v1/tradehistory/{pair_id}/{size}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get transfer records of the current trader address.
+    rpc GetTransfers (GetTransfersRequest) returns (GetTransfersResponse) {
+        option (google.api.http) = {
+            get: "/v1/transfers/{trader_addr}/{action}/{size}/{page}"
+            additional_bindings { get: "/v1/transfers/{action}/{size}/{page}" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse) {
+        option (google.api.http) = {
+            post: "/v1/placeorder"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc ContraTrade (ContraTradeRequest) returns (ContraTradeResponse) {
+        option (google.api.http) = {
+            post: "/v1/contratrade"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+
+    rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse) {
+        option (google.api.http) = {
+            post: "/v1/cancelorder"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc CancelAllOrders (CancelAllOrdersRequest) returns (CancelAllOrdersResponse) {
+        option (google.api.http) = {
+            post: "/v1/cancelallorders"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc Withdraw (WithdrawRequest) returns (WithdrawResponse) {
+        option (google.api.http) = {
+            post: "/v1/withdraw"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    //-------------------------- User Account ------------------------------------
+
+    // authenticate with user credentials
+    rpc Authenticate (AuthenticateRequest) returns (AuthenticateResponse) {
+        option (google.api.http) = {
+            post: "/v1/authenticate"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+
+
+    // 钱包SimpleWallet协议回调。
+    rpc SimpleWalletCallback (SimpleWalletCallbackRequest) returns (SimpleWalletCallbackResponse) {
+        option (google.api.http) = {
+            post: "/v1/wallet/sw"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // 钱包SimpleWallet协议回调。
+    rpc GetSimpleWalletRecord (GetSimpleWalletRecordRequest) returns (GetSimpleWalletRecordResponse) {
+        option (google.api.http) = {
+            get: "/v1/wallet/record"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get kline bar of symbol with the given resolution and time period.
+    rpc GetKlineHistory (GetKlineHistoryRequest) returns (GetKlineHistoryResponse) {
+        option (google.api.http) = {
+            get: "/v1/kline/history"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get kline configuration
+    rpc GetKlineConfig (GetKlineConfigRequest) returns (GetKlineConfigResponse) {
+        option (google.api.http) = {
+            get: "/v1/kline/config"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get kline symbol info.
+    rpc GetKlineSymbols (GetKlineSymbolInfoRequest) returns (GetKlineSymbolInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/kline/symbols"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+
+
+    //-------------------------- Blockchain --------------------------------------
+
+    rpc GetChainInfo (GetChainInfoRequest) returns (GetChainInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/chaininfo"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+
+
+    //----------------------------- Miscs ----------------------------------------
+
+    rpc GetBannerCampaigns (GetBannerCampaignsRequest) returns (GetBannerCampaignsResponse) {
+        option (google.api.http) = {
+            get: "/v1/bannercampaigns/{lang}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    rpc GetNotifications (GetNotificationsRequest) returns (GetNotificationsResponse) {
+        option (google.api.http) = {
+            get: "/v1/notifications/{lang}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    rpc GetServerTime (GetServerTimeRequest) returns (GetServerTimeResponse) {
+        option (google.api.http) = {
+            get: "/v1/servertime"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get trade records of the current trader address.
+    rpc GetTokenBalances (GetTokenBalancesRequest) returns (GetTokenBalancesResponse) {
+        option (google.api.http) = {
+            post: "/v1/tokenbalances"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get trade records of the current trader address.
+    rpc GetCoinPrice (GetCoinPriceRequest) returns (GetCoinPriceResponse) {
+        option (google.api.http) = {
+            get: "/v1/coinprice/{symbol}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    rpc GetAppInfo (GetAppInfoRequest) returns (GetAppInfoResponse) {
+        option (google.api.http) = {
+            post: "/v1/app/info"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+}
+
+message GetAppInfoRequest {
+    string version = 1;
+    string device_type =2;
+    string lang = 3;
+}
+
+message GetAppInfoResponse {
+    string version = 1;
+    string version_url = 2;
+    string download_url = 3;
+    int64  status = 4;
+    string comment = 5;
+    string comment_en = 7;
+    string platform = 8;
+    string createTime = 9;
+}
+
+//-------------------------- User Action   -----------------------------
+
+message UserActionRequest {
+    string trader = 1;
+    string chain = 2;
+    string action = 3;
+    string user_from = 4;
+}
+
+message UserActionResponse {
+}
+
+//-------------------------- GetMarket -----------------------------------------
+
+message GetMarketRequest {
+    string chain_token = 1;
+}
+
+message GetMarketResponse {
+    map<string, MarketData> marketData = 1;
+}
+
+message MarketData {
+    string market_addr = 1;
+    dex.MarketLabel label = 2;
+    MarketConfig config = 3;
+}
+//-------------------------- GetTradingConfig ----------------------------------
+
+message GetTradingConfigRequest {
+    // 要查看的网络配置，默认为ETH。
+    string chain_token = 1;
+    // 要查看的计价货币，默认为ETH。
+    string cash_token = 2;
+}
+
+message GetTradingConfigResponse {
+    TradingConfig trading_config = 1;
+}
+
+//-------------------------- GetPairsByCash ------------------------------------
+
+message GetPairsByCashRequest {
+    string cash_token_id = 1;
+    string chain_token = 2;
+}
+
+message GetPairsByCashResponse {
+    repeated PairInfo pairs = 1;
+    CoinPrice coin_price = 2; // ALL时为nil。
+}
+
+//-------------------------- GetPairInfo ---------------------------------------
+
+message GetPairInfoRequest {
+    string pair_id = 1;
+}
+
+message GetPairInfoResponse {
+    PairInfo pair_info = 1;
+    CoinPrice coin_price = 2;
+}
+
+//-------------------------- GetTokenMetadata ------------------------------------
+
+message GetTokenMetadataRequest {
+    string token_id = 1;
+    // 当前网络或要查的币所属网络。默认为ETH。
+    string chain_token = 2;
+}
+
+message GetTokenMetadataResponse {
+    map<string, TokenMetadata> tokens = 1;
+}
+
+//-------------------------- GetDepth ------------------------------------------
+
+message GetDepthRequest {
+    string pair_id = 1;
+    int32 size = 2;
+
+    // The price step of merging. 0 or 8 means no merging.
+    int64 merging_decimals = 3; // 0 | 4 | 5 | 6 | 7 | 8
+}
+
+message GetDepthResponse {
+    Depth depth = 1;
+}
+
+//-------------------------- GetBalancesRequest ---------------------------------
+
+message GetBalancesRequest {
+    string trader_addr = 1;
+    string chain_token = 2;
+}
+
+message GetBalancesResponse {
+    repeated TokenBalance balances = 1;
+
+    //The total valuation of the account
+    string estimated_value = 2;
+}
+
+//-------------------------- GetActiveOrders -----------------------------------
+message GetActiveOrdersRequest {
+    string trader_addr = 1;
+
+    string pair_id = 2;
+
+    int32 size = 3;
+    int32 page = 4; // 1-based
+
+    string chain_token = 5;
+
+    // TODO: support filtering
+    // TODO: support using `pair_id = all` to get orders of all PairIds
+}
+
+message GetActiveOrdersResponse {
+    repeated Order orders = 1;
+
+    int32 page = 2; // the requested page or the last page, whichever is smaller
+    int32 total = 3;
+}
+
+//-------------------------- GetPastOrdersRequest ------------------------------
+
+message GetPastOrdersRequest {
+    string trader_addr = 1;
+    string pair_id = 2;
+
+    int32 size = 3;
+    int32 page = 4; // 1-based
+
+    // Times are inclusive
+    int64 from_time_sec = 5;
+    int64 to_time_sec = 6;
+
+    string chain_token = 7;
+
+    // TODO: support filters.
+}
+
+message GetPastOrdersResponse {
+    repeated Order orders = 1; // sorted by order id (descending)
+
+    int32 page = 2; // the requested page or the last page, whichever is smaller
+    int32 total = 3;
+}
+
+//---------------------------- GetOrderByIdRequest ------------------------------
+
+message GetOrderByIdRequest {
+    string trader_addr = 1;
+    int64 order_id = 2;
+    string chain_token = 3;
+}
+
+message GetOrderByIdResponse {
+    Order order = 1;
+}
+
+//------------------------------- GetTradesRequest ------------------------------
+
+message GetTradesRequest {
+    string trader_addr = 1;
+    string pair_id = 2;
+    int32 size = 3;
+    string chain_token = 4;
+}
+
+message GetTradesResponse {
+    repeated MyTrade trades = 1;
+}
+
+//-------------------------- GetTradeHistoryRequest -----------------------------
+
+message GetTradeHistoryRequest {
+    string pair_id = 1;
+    int32 size = 2;
+}
+
+message GetTradeHistoryResponse {
+    // Sorted in reverse chronological order. The `action` field the taker's action.
+    repeated TradeRecord records = 1;
+}
+
+//-------------------------- GetTransfers --------------------------------------
+
+message GetTransfersRequest {
+    string trader_addr = 1;
+
+    string action = 2; // "deposit" | "withdraw"
+    int32 size = 3;
+    int32 page = 4; // 1-based
+
+    string chain_token = 5;
+
+    // TODO: support filters.
+}
+
+message GetTransfersResponse {
+    repeated Transfer transfers = 1; // sorted chronologically
+
+    int32 page = 2; // the requested page or the last page, whichever is smaller
+    int32 total = 3;
+}
+
+//-------------------------- PlaceOrder ----------------------------------------
+
+message PlaceOrderRequest {
+    string trader_addr = 1;
+    string pair_id = 2;
+    dex.Order.Action action = 3;
+    string price = 4;
+    string amount = 5;
+    int64 expire_time_sec = 6;
+    // bool ioc = 7;  TODO: support this
+    int64 nonce = 8;
+
+    // The hex form of the order signature in the [R || S || V] format where V is 0 or 1. The length
+    // (including the "0x" prefix) must be 132.
+    string sig = 9;
+
+    string chain_token = 10;
+    string public_key = 11;
+    string extra = 12;
+}
+
+message PlaceOrderResponse {
+    Order order = 1;
+    bool isSuccess = 2;
+}
+
+message ContraTradeRequest {
+    string trader_addr = 1;
+    string pair_id = 2;
+    dex.Order.Action action = 3;
+    string price = 4;
+    string amount = 5;
+    int64 expire_time_sec = 6;
+    int64 nonce = 8;
+    string sig = 9;
+}
+
+message ContraTradeResponse {
+    Order order = 1;
+}
+
+//-------------------------- CancelOrder ---------------------------------------
+
+message CancelOrderRequest {
+    string trader_addr = 1;
+
+    // The id of the trading pair the order belongs to.
+    string pair_id = 2;
+
+    // The id of the order to be canceled.
+    int64 order_id = 3;
+
+    // The nonce of this request.
+    int64 nonce = 4;
+
+    string chain_token = 5;
+}
+
+message CancelOrderResponse {
+}
+
+//------------------------- CancelAllOrdersRequest -----------------------------
+
+message CancelAllOrdersRequest {
+    string trader_addr = 1;
+
+    // The id of the trading pair the orders belongs to.
+    string pair_id = 2;
+
+    // The nonce of this request.
+    int64 nonce = 3;
+
+    string chain_token = 4;
+}
+
+// Notes:
+// - No order is cancelled if an error is returned.
+// - If no open orders found `cancelled_order_ids` will be empty. This case is not an error.
+message CancelAllOrdersResponse {
+    repeated int64 cancelled_order_ids = 1;
+}
+
+//-------------------------- Withdraw ------------------------------------------
+
+message WithdrawRequest {
+    string trader_addr = 1;
+    string token_id = 2;
+    string amount = 3; // pre-fee amount
+
+    int64 timestamp_sec = 4;
+    string sig = 5;
+
+    string chain_token = 6;
+    string public_key = 7;
+    string extra = 8;
+}
+
+message WithdrawResponse {
+}
+
+//-------------------------- Authenticate --------------------------------------
+
+message AuthenticateRequest {
+    // requested duration for token, TODO carry this value into token TTL
+    int64 duration_sec = 5;
+
+    //  //-------------------- Fields for Login via Email/Password --------------------------
+    //  string email = 1;
+    //  string password = 2;
+
+    //-------------------- Fields for Login via Trader Address --------------------------
+    string trader = 3;
+
+    int64 timestamp_sec = 4;
+
+    // sig of "DEx2: Authenticate Trader <TraderAddr> at time <TimestampSec> for <DurationSec> Seconds"
+    string sig = 6;
+
+    string chain_token = 7;
+    string public_key = 8;
+    string extra = 9;
+}
+
+message AuthenticateResponse {
+    string token = 1;
+
+    // if authentication is done via trader address, `user` will be omitted
+    //  User user = 2;
+}
+
+//-------------------------- SimpleWallet Callback --------------------------------------
+message SimpleWalletCallbackRequest {
+    string protocol = 1;
+    string version = 2;
+    string blockchain = 3;
+    int64 timestamp = 4;
+    string sign = 5;
+    string uuID = 6;
+    string account = 7;
+    string ref = 8;
+}
+
+message SimpleWalletCallbackResponse {
+    int32 code = 1;
+    string error = 2;
+}
+
+// 获取SimpleWallet记录的请求体和返回体。
+message GetSimpleWalletRecordRequest {
+    string uuid = 1;
+    string action = 2;
+}
+
+message GetSimpleWalletRecordResponse {
+    int32 code = 1;
+    string token = 2;
+}
+
+//-------------------------- GetKlineHistroy ----------------------------------
+
+message GetKlineHistoryRequest {
+    // Trading pair id, e.g. "ETH_ADX"
+    string symbol = 1;
+
+    // Unix timestamp, e.g. 1386493512
+    int64 from = 2;
+    int64 to = 3;
+
+    // The time resolution with one value of "5" | "15" | "30" | "60" | "1D" | "1W"
+    string resolution = 4;
+
+    string serial_id = 5;
+}
+
+message GetKlineHistoryResponse {
+    // Response status with one value of "ok" | "error"
+    string status = 1 [json_name = "s"];
+
+    // Set iff status is "error"
+    string err_message = 2 [json_name = "errmsg"];
+
+    // Array of bar unix timestamp, e.g. [1386493512, 1386493572, 1386493632]
+    repeated int64 timestamps = 3 [json_name = "t"];
+
+    // Array of price, e.g. [42.1, 43.4, 44.3]
+    repeated double close = 4 [json_name = "c"];
+    repeated double open = 5 [json_name = "o"];
+    repeated double high = 6 [json_name = "h"];
+    repeated double low = 7 [json_name = "l"];
+
+    // Array of volume, e.g. [12000, 18500, 24000]
+    repeated double volumes = 8 [json_name = "v"];
+
+    string serial_id = 9;
+}
+
+//--------------------------- GetKlineConfig -----------------------------------
+
+message GetKlineConfigRequest {
+
+}
+
+message GetKlineConfigResponse {
+    // An array of supported resolutions
+    repeated string supported_resolutions = 1 [json_name = "supported_resolutions"];
+
+    // Showing whether datafeed supports marks on bars or not
+    bool supports_marks = 2 [json_name = "supports_marks"];
+
+    // Set this one to true if datafeed provides server time (unix time).
+    // It is used to adjust Countdown on the Price scale.
+    bool supports_time = 3 [json_name = "supports_time"];
+
+    // Set this one to true if datafeed supports symbol search and individual symbol resolve logic
+    bool supports_search = 4 [json_name = "supports_search"];
+
+    // Set this one to true if datafeed provides full info about symbols group only and
+    // is not able to perform symbol search or individual symbol resolve.
+    bool supports_group_request = 5 [json_name = "supports_group_request"];
+
+    // Note that either `supports_search` or `supports_group_request` SHOULD be true.
+}
+
+//------------------------- GetKlineSymbolInfo ---------------------------------
+
+message GetKlineSymbolInfoRequest {
+    string symbol = 1;
+}
+
+// TODO: test more fields that tradingview really maters but are not added here
+// `SymbolInfo` contains all possible configuration of a symbol
+// (suppose that all symbols have the same configuration)
+//
+message GetKlineSymbolInfoResponse {
+    string name = 1 [json_name = "name"];
+    string ticker = 2 [json_name = "ticker"];
+    string description = 3 [json_name = "description"];
+
+    // The trading hours
+    string session = 4 [json_name = "session"];
+
+    // The exchange timezone
+    string timezone = 5 [json_name = "timezone"];
+
+    // Minimal possible price change is determined by `PriceScale` and `MinMov`
+    // it can be calculated by `MinMov / PriceScale`
+    //
+    // e.g. Typical stock with 0.01 price increment then: MinMov = 1, PriceScale = 100
+    int32 price_scale = 6 [json_name = "pricescale"];
+    int32 minmov = 7 [json_name = "minmov"];
+
+    // Show whether symbol has intraday (minutes) history data
+    bool has_intraday = 8 [json_name = "has_intraday"];
+
+    // An array of resolutions which should be enabled in resolutions picker for this symbol
+    repeated string supported_resolutions = 9 [json_name = "supported_resolutions"];
+
+    // Show whether symbol has seconds history data
+    bool has_seconds = 10 [json_name = "has_seconds"];
+
+    // Show whether library should generate empty bars in session
+    // when there is no data from datafeed for this time
+    bool has_empty_bars = 11 [json_name = "has_empty_bars"];
+
+    // Show whether symbol has volume data or not
+    bool has_no_volume = 12 [json_name = "has_no_volume"];
+
+    // Typical volume value decimal places for this symbol. 0 means volume always in an integer
+    int32 volume_precision = 13 [json_name = "volume_precision"];
+}
+
+//-------------------------- GetChainInfo --------------------------------------
+
+message GetChainInfoRequest {
+}
+
+message GetChainInfoResponse {
+    // "1": Ethereum Mainnet
+    // "2": Morden Testnet (deprecated)
+    // "3": Ropsten Testnet
+    // "4": Rinkeby Testnet
+    // "42": Kovan Testnet
+    string network_id = 1;
+
+    // "Mainnet" | "Morden" | "Ropsten" | "Rinkeby" | "Koven" | "Unknown"
+    string network_name = 2;
+
+    // Last indexed block in server.
+    int64 last_indexed_block_number = 3;
+}
+
+//-------------------------- ServerTime --------------------------------------
+
+message GetServerTimeRequest {
+}
+
+message GetServerTimeResponse {
+    int64 server_time_ms = 1;
+}
+
+//-------------------------- GetBannerCampaigns -------------------------------
+
+message GetBannerCampaignsRequest {
+    string lang = 1; // "en" | "zh"
+    int32 type = 2;
+}
+
+message GetBannerCampaignsResponse {
+    repeated Campaign campaigns = 1;
+}
+
+//-------------------------- GetNotifications -------------------------------
+
+message GetNotificationsRequest {
+    string lang = 1; // "en" | "zh"
+}
+
+message GetNotificationsResponse {
+    repeated Notification notifications = 1;
+}
+
+
+
+
+
+//-------------------------- Get Tokne Balance  -----------------------------
+message GetTokenBalancesRequest {
+    //-------------------- Fields for Login via Trader Address --------------------------
+    string trader = 1;
+    string chain = 2;
+    string tokensymbol = 3;
+
+    int64 timestamp_sec = 4; // 时间戳
+    int64 duration_sec = 5; // 持续时间
+
+    // sig of "DEx2: Authenticate Trader <TraderAddr> at time <TimestampSec> for <DurationSec> Seconds"
+    string sig = 6;
+    string Extra =7;
+}
+
+message GetTokenBalancesResponse {
+    string total = 1;
+    string locked = 2;
+}
+
+//-------------------------- Get Coin Price  -----------------------------
+message GetCoinPriceRequest {
+    //-------------------- Fields for Login via Trader Address --------------------------
+    string symbol = 1;
+}
+
+message CoinPrice {
+    string symbol = 1;
+    string name = 2;
+    float price_cny = 3;
+    float price_usd = 4;
+}
+
+message GetCoinPriceResponse {
+    repeated CoinPrice coin_price = 1;
+}

@@ -1,0 +1,244 @@
+// 对各链通用接口定义。
+
+syntax = "proto3";
+
+package com;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/common";
+
+import "google/api/annotations.proto";
+import "git.bibox.com/dextop/common.git/proto/dex2fe/dfedata.proto";
+
+service CommonService {
+
+    // 获取指定链指定交易区的配置信息。
+    rpc GetMarket (GetMarketRequest) returns (GetMarketResponse);
+
+    // 获取指定交易区币种的交易配置。
+    rpc GetTradingConfig (GetTradingConfigRequest) returns (GetTradingConfigResponse);
+
+    // 获取指定交易区的市场信息。
+    rpc GetPairsByCash (GetPairsByCashRequest) returns (GetPairsByCashResponse);
+
+    // 获取单个币种对的市场信息。
+    rpc GetPairInfo (GetPairInfoRequest) returns (GetPairInfoResponse);
+
+    // 获取币种信息。
+    rpc GetTokenMetadata (GetTokenMetadataRequest) returns (GetTokenMetadataResponse);
+
+    // 获取某个币种对的深度。
+    rpc GetDepth (GetDepthRequest) returns (GetDepthResponse);
+
+    // 获取用户余额，统一通过user_asset表处理。
+    rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse);
+
+    // 获取用户成交记录。 TODO 待确定。
+    rpc GetTrades (GetTradesRequest) returns (GetTradesResponse);
+
+    // 获取某个币种对的成交记录。
+    rpc GetTradeHistory (GetTradeHistoryRequest) returns (GetTradeHistoryResponse);
+
+    // // 获取充值、提现记录。 TODO 后续可以通过拼接sql统一处理。
+    // rpc GetTransfers (GetTransfersRequest) returns (GetTransfersResponse);
+
+    // 根据给定的时间段和起止时间获取K线信息。
+    rpc GetKlineHistory (GetKlineHistoryRequest) returns (GetKlineHistoryResponse);
+
+    //----------------------------- Miscs ----------------------------------------
+
+    // 获取banner配置。
+    rpc GetBannerCampaigns (GetBannerCampaignsRequest) returns (GetBannerCampaignsResponse);
+
+    // 获取通知信息。
+    rpc GetNotifications (GetNotificationsRequest) returns (GetNotificationsResponse);
+
+}
+
+//-------------------------- GetMarket -----------------------------------------
+
+message GetMarketRequest {
+    string chain_token = 1;
+    string cash_token = 2;
+}
+
+message GetMarketResponse {
+    map<string, MarketData> marketData = 1;
+}
+
+// 直接自行定义，避免需要重新引入dfeservice.proto。
+message MarketData {
+    string market_addr = 1;
+    string label = 2;
+    dfe.MarketConfig config = 3;
+}
+
+//-------------------------- GetTradingConfig ----------------------------------
+
+message GetTradingConfigRequest {
+    // 要查看的网络配置，默认为ETH。
+    string chain_token = 1;
+    // 要查看的计价货币，默认为ETH。
+    string cash_token = 2;
+}
+
+message GetTradingConfigResponse {
+    dfe.TradingConfig trading_config = 1;
+}
+
+//-------------------------- GetPairsByCash ------------------------------------
+
+message GetPairsByCashRequest {
+    string chain_token = 1;
+    string cash_token = 2;
+}
+
+message GetPairsByCashResponse {
+    repeated dfe.PairInfo pairs = 1;
+}
+
+//-------------------------- GetPairInfo ---------------------------------------
+
+message GetPairInfoRequest {
+    string token_pair = 1;
+}
+
+message GetPairInfoResponse {
+    dfe.PairInfo pair_info = 1;
+}
+
+//-------------------------- GetTokenMetadata ------------------------------------
+
+message GetTokenMetadataRequest {
+    // 当前网络或要查的币所属网络。默认为ETH。
+    string chain_token = 1;
+    string token_symbol = 2;
+}
+
+message GetTokenMetadataResponse {
+    map<string, dfe.TokenMetadata> tokens = 1;
+}
+
+//-------------------------- GetDepth ------------------------------------------
+
+message GetDepthRequest {
+    string token_pair = 1;
+    int32 size = 2;
+
+    // The price step of merging. 0 or 8 means no merging.
+    int64 merging_decimals = 3; // 0 | 4 | 5 | 6 | 7 | 8
+}
+
+message GetDepthResponse {
+    dfe.Depth depth = 1;
+}
+
+//-------------------------- GetBalancesRequest ---------------------------------
+
+message GetBalancesRequest {
+    string chain_token = 1;
+    string trader = 2;
+}
+
+message GetBalancesResponse {
+    repeated dfe.TokenBalance balances = 1;
+
+    //The total valuation of the account
+    string estimated_value = 2;
+}
+
+//------------------------------- GetTradesRequest ------------------------------
+
+message GetTradesRequest {
+    string chain_token = 1;
+    string trader = 2;
+    string token_pair = 3;
+    int32 size = 4;
+}
+
+message GetTradesResponse {
+    repeated dfe.MyTrade trades = 1;
+}
+
+//-------------------------- GetTradeHistoryRequest -----------------------------
+
+message GetTradeHistoryRequest {
+    string token_pair = 1;
+    int32 size = 2;
+}
+
+message GetTradeHistoryResponse {
+    // Sorted in reverse chronological order. The `action` field the taker's action.
+    repeated dfe.TradeRecord records = 1;
+}
+
+////-------------------------- GetTransfers --------------------------------------
+//
+//message GetTransfersRequest {
+//    string chain_token = 1;
+//    string trader = 2;
+//    string action = 3; // "deposit" | "withdraw"
+//    int32 size = 4;
+//    int32 page = 5;  // 1-based
+//}
+//
+//message GetTransfersResponse {
+//    repeated dfe.Transfer transfers = 1;  // sorted chronologically
+//
+//    int32 page = 2;  // the requested page or the last page, whichever is smaller
+//    int32 total = 3;
+//}
+
+//-------------------------- GetKlineHistroy ----------------------------------
+
+message GetKlineHistoryRequest {
+    // Trading pair id, e.g. "ETH_ADX"
+    string token_pair = 1;
+
+    // Unix timestamp, e.g. 1386493512
+    int64 from = 2;
+    int64 to = 3;
+
+    // The time resolution with one value of "5" | "15" | "30" | "60" | "1D" | "1W"
+    string resolution = 4;
+}
+
+message GetKlineHistoryResponse {
+    // Response status with one value of "ok" | "error"
+    string status = 1 [json_name = "s"];
+
+    // Set iff status is "error"
+    string err_message = 2 [json_name = "errmsg"];
+
+    // Array of bar unix timestamp, e.g. [1386493512, 1386493572, 1386493632]
+    repeated int64 timestamps = 3 [json_name = "t"];
+
+    // Array of price, e.g. [42.1, 43.4, 44.3]
+    repeated double close = 4 [json_name = "c"];
+    repeated double open = 5 [json_name = "o"];
+    repeated double high = 6 [json_name = "h"];
+    repeated double low = 7 [json_name = "l"];
+
+    // Array of volume, e.g. [12000, 18500, 24000]
+    repeated double volumes = 8 [json_name = "v"];
+}
+
+//-------------------------- GetBannerCampaigns -------------------------------
+
+message GetBannerCampaignsRequest {
+    string lang = 1; // "en" | "zh"
+    int32 type = 2;
+}
+
+message GetBannerCampaignsResponse {
+    repeated dfe.Campaign campaigns = 1;
+}
+
+//-------------------------- GetNotifications -------------------------------
+
+message GetNotificationsRequest {
+    string lang = 1; // "en" | "zh"
+}
+
+message GetNotificationsResponse {
+    repeated dfe.Notification notifications = 1;
+}

@@ -1,0 +1,292 @@
+// 定义各个链的server需要对外提供的服务的接口。
+
+syntax = "proto3";
+
+package chain;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/chain";
+
+import "google/api/annotations.proto";
+import "serverdata.proto";
+
+import "git.bibox.com/dextop/common.git/proto/dex2/ledgerstate.proto";
+import "git.bibox.com/dextop/common.git/proto/dex2fe/dfedata.proto";
+
+service ChainService {
+
+    // 获取市场信息。
+    rpc GetMarket (GetMarketRequest) returns (GetMarketResponse);
+
+    // 获取市场配置数据。
+    rpc GetTradingConfig (GetTradingConfigRequest) returns (GetTradingConfigResponse);
+
+    // 获取指定链(chainToken)或链中计价币(cashTokenSymbol)下各币种的行情信息。
+    rpc GetCoinPairList (GetCoinPairListRequest) returns (GetCoinPairListResponse);
+
+    // 获取指定地址NEO各种资产的余额。
+    rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse);
+
+    // 分页获取用户的当前挂单，已过期或完成挂单数据。
+    rpc GetOrdersOfTrader (GetOrdersOfTraderRequest) returns (GetOrdersOfTraderResponse);
+
+    // 根据用户地址和订单id获取订单信息。
+    rpc GetOrderById (GetOrderByIdRequest) returns (GetOrderByIdResponse);
+
+    // 新增下单。
+    rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+
+    // 取消订单。
+    rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+
+    // 取消一个用户在某个交易区订所有订单。
+    rpc CancelOrdersByTrader (CancelOrdersByTraderRequest) returns (CancelOrdersByTraderResponse) {
+    };
+
+    // 获取充值/提现记录。
+    rpc GetTransferRecord (GetTransferRecordRequest) returns (GetTransferRecordResponse);
+
+    // 用户发起提现，添加提现记录。
+    rpc Withdraw (WithdrawRequest) returns (WithdrawResponse);
+
+}
+
+//----------------------------- GetMarket --------------------------------------
+
+message GetMarketRequest {
+    string chain_token = 1;
+}
+
+message GetMarketResponse {
+    map<string, MarketData> marketData = 1;
+}
+
+message MarketData {
+    string market_addr = 1;
+    dex.MarketLabel label = 2;
+    dfe.MarketConfig config = 3;
+}
+
+//----------------------------- GetAccount -------------------------------------
+
+message GetBalancesRequest {
+    string trader = 1;
+    string chain_token = 2;
+}
+
+message GetBalancesResponse {
+    string trader = 1;
+    repeated TokenBalance balances = 2;
+}
+
+message TokenBalance {
+    // This id of this token.
+    string token_symbol = 1;
+
+    // The total amount (multiplied by 1e8), including the locked part, NOT including the pending withdraw.
+    uint64 total_e8 = 2;
+
+    uint64 active_e8 = 3;
+
+    // The amount (multiplied by 1e8) locked due to, for example, having active orders. This part
+    // will be subtracted from the quota of withdrawing and placing new orders.
+    uint64 locked_e8 = 4;
+
+    // 提现中的金额。
+    uint64 withdrawing = 5;
+}
+
+//-------------------------- GetTradingConfig ----------------------------------
+
+message GetTradingConfigRequest {
+    // 要查看的网络配置，默认为ETH。
+    string chain_token = 1;
+    // 要查看的计价货币，默认为ETH。
+    string cash_token_symbol = 2;
+}
+
+message GetTradingConfigResponse {
+    dfe.TradingConfig trading_config = 1;
+}
+
+//-------------------------- GetCoinPairList ----------------------------------
+
+message GetCoinPairListRequest {
+    // 要查看的网络配置。
+    string chain_token = 1;
+    // 要查看的计价货币。可空
+    string cash_token_symbol = 2;
+}
+
+message GetCoinPairListResponse {
+    repeated CoinPair pairList = 1;
+}
+
+//----------------------------- GetOrdersOfTrader ------------------------------
+
+message GetOrdersOfTraderRequest {
+    string trader = 1;
+    string chain_token = 2;
+
+    string cash_token_symbol = 3; // e.g. "ETH"
+    string stock_token_symbol = 4; // e.g. "ADX"
+
+    int32 order_type = 5; // 0: 当前挂单；1: 历史订单。
+
+    int32 page = 6;
+    int32 pageSize = 7;
+
+    int64 from_time_sec = 8;
+    int64 to_time_sec = 9;
+}
+
+message GetOrdersOfTraderResponse {
+    repeated Order orders = 1;
+    int32 page = 2;
+    int32 total = 3;
+}
+
+//----------------------------- GetOrderById ------------------------------
+
+message GetOrderByIdRequest {
+    string trader = 1;
+    string chain_token = 2;
+    int64 order_id = 3;
+}
+
+message GetOrderByIdResponse {
+    Order order = 1;
+}
+
+//----------------------------- PlaceOrder -------------------------------------
+
+message PlaceOrderRequest {
+    string trader = 1;
+    // 用户来源： 登陆签名工具名称。
+    string user_from = 2;
+
+    int32 action = 3;
+
+    int32 type = 4;
+
+    string stock_token_symbol = 5; // e.g. "ETH"
+    string cash_token_symbol = 6; // e.g. "ADX"
+
+    uint64 price_e8 = 7;
+    uint64 amount_e8 = 8;
+
+    int64 expire_time = 9;
+
+    string order_sign = 10;
+    // User-Agent
+    string ua = 11;
+}
+
+// Error information, if any, will be returned as status.
+message PlaceOrderResponse {
+    bool result = 1; // the newly accepted order
+}
+
+//---------------------------- CancelOrder ------------------------------------
+
+message CancelOrderRequest {
+    string trader = 1;
+
+    string stock_token_symbol = 2; // e.g. "ADX"
+
+    string cash_token_symbol = 3; // e.g. "ETH"
+
+    int64 order_id = 4;
+}
+
+// Error information, if any, will be returned as status.
+message CancelOrderResponse {
+    bool result = 1;
+}
+
+//----------------------------- CancelOrdersByIds ------------------------------
+
+message CancelOrdersByTraderRequest {
+    string trader = 1;
+
+    string stock_token_symbol = 2; // e.g. "ADX"
+
+    string cash_token_symbol = 3; // e.g. "ETH"
+}
+
+// Notes:
+// - No order is cancelled if an error is returned.
+// - An order will be skipped if it is not found, or has already been cancelled, or does not belong
+//   to the trader. Such cases are not regarded as errors.
+message CancelOrdersByTraderResponse {
+    bool result = 1;
+    // repeated int64 cancelled_order_ids = 2;
+}
+
+//----------------------------- GetTransferRecord ------------------------------
+
+message GetTransferRecordRequest {
+    string trader = 1;
+    string chain_token = 2;
+    int32 action = 3; // 0: deposit；1: withdraw
+
+    int32 page = 4;
+    int32 size = 5;
+}
+
+message GetTransferRecordResponse {
+    repeated Transfer transfers = 1;
+
+    int32 page = 2;
+    int32 total = 3;
+}
+
+// 充值或提现记录。
+message Transfer {
+    //  int64 time_ms = 1;
+    int32 action = 1; // 1: deposit；2: withdraw
+
+    int64 id = 2;
+
+    int64 operate_index = 3; // 合约操作序列。
+
+    // The block number of a deposit
+    int64 block_number = 4;
+
+    // The transaction hash of a deposit.
+    string tx_hash = 5;
+
+    string trader = 6;
+
+    // The id of the transferred token.
+    string token_symbol = 7;
+
+    // The amount transferred.
+    uint64 amount_e8 = 8;
+
+    uint64 fee_e8 = 9;
+
+    // The balance (including locked part) after the transfer.
+    uint64 balance_e8 = 10;
+
+    // Deposit - "Confirming" | "Done"
+    // Withdraw - "Waiting" | "Send" | "Done"
+    string status = 11;
+
+    int64 create_time = 12;
+}
+
+//----------------------------- Withdraw ------------------------------
+
+message WithdrawRequest {
+    string trader = 1;
+
+    string chain_token = 2;
+
+    string token_symbol = 3;
+
+    uint64 amount_e8 = 4;
+}
+
+message WithdrawResponse {
+    bool result = 1;
+}

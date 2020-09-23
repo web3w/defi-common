@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+import "ledgerstate.proto";
+
+message TradeEvent {
+  // Consecutive. The first event has index 1.
+  int64 event_index = 1;
+
+  // the index of the commit for which this event was emitted
+  int64 commit_index = 2;
+
+  int64 logic_time_ms = 3;
+
+  // Must sync up body cases with boilerplates:
+  // - github.com/dexDev/dex2/proto/pbu/tradeevent.go
+  oneof body {
+    SetFeeRatesEvent set_fee_rates = 4;
+    AddDepositEvent add_deposit = 5;
+    InitiateWithdrawEvent initiate_withdraw = 6;
+    PlaceOrderEvent place_order = 7;
+    CancelOrderEvent cancel_order = 8;
+    MatchOrdersEvent match_orders = 9;
+    ExpiredOrdersEvent expired_orders = 10;
+  }
+}
+
+message SetFeeRatesEvent {
+  uint64 maker_fee_rate_e4 = 1;
+  uint64 taker_fee_rate_e4 = 2;
+  uint64 withdraw_fee_rate_e4 = 3;
+}
+
+message AddDepositEvent {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  // The token id of the deposit
+  string token_id = 3;
+
+  // The token code of the deposit
+  uint32 token_code = 4;
+
+  // The deposit amount
+  uint64 amount_e8 = 5;
+
+  // The new token balance after the deposit.
+  TokenBalance new_balance = 6;
+
+  // The index of deposit in the smart contract storage.
+  int64 depositIndex = 7;
+}
+
+// Event - initiates a withdraw.
+message InitiateWithdrawEvent {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  // The token id of the withdraw
+  string token_id = 3;
+
+  // The token code of the withdraw
+  uint32 token_code = 4;
+
+  // The withdraw amount
+  uint64 amount_e8 = 5;
+
+  // The withdraw fee
+  uint64 withdraw_fee_e8 = 6;
+
+  // The new token balance after the event.
+  TokenBalance new_balance = 7;
+}
+
+message PlaceOrderEvent {
+  string market_addr = 1;
+
+  // The place order - before any matching.
+  Order order = 2;
+
+  // For a buy  order, this is the new balance of the cash  token after placing the order;
+  // For a sell order, this is the new balance of the stock token after placing the order.
+  TokenBalance new_balance = 3;
+}
+
+// This is the "soft-cancel", i.e. the order cancelled in the trader server WITHOUT marking it
+// on the blockchain.
+message CancelOrderEvent {
+  string market_addr = 1;
+
+  // The cancelled order. Its status is either Cancelled or PartiallyCancelled.
+  Order order = 2;
+
+  // For a buy  order, this is the new balance of the cash  token after cancelling the order;
+  // For a sell order, this is the new balance of the stock token after cancelling the order.
+  TokenBalance new_balance = 3;
+}
+
+message MatchOrdersEvent {
+  string market_addr = 1;
+
+  uint32 pair_code = 2;
+
+  // the execution price
+  uint64 exe_price_e8 = 3;
+
+  // the stock amount executed in this matching
+  uint64 exe_amount_e8 = 4;
+
+  // the maker fee in this matching
+  uint64 maker_fee_e8 = 5;
+
+  // the taker fee in this matching
+  uint64 taker_fee_e8 = 6;
+
+  // Whether the maker order was unfilled before this matching.
+  bool was_maker_order_unfilled = 7;
+
+  // Whether the take order was unfilled before this matching.
+  bool was_taker_order_unfilled = 8;
+
+  // the updated maker order
+  Order new_maker_order = 9;
+
+  // the updated take order
+  Order new_taker_order = 10;
+
+  TokenBalance new_maker_cash_balance = 11;
+  TokenBalance new_maker_stock_balance = 12;
+  TokenBalance new_taker_cash_balance = 13;
+  TokenBalance new_taker_stock_balance = 14;
+}
+
+message ExpiredOrdersEvent {
+  string market_addr = 1;
+  int64 logic_time_sec = 2;
+
+  // `trader_addrs` and `new_balances` are equal in length. `trader_addrs[i]` is the trader address
+  // of `new_balances[i]`.
+  repeated string trader_addrs = 3;
+  repeated TokenBalance new_balances = 4;
+}

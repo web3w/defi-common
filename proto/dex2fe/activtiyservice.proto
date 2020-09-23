@@ -1,0 +1,252 @@
+syntax = "proto3";
+
+package dfe;
+
+// ** Please Read README.md for the Conventions **
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2fe";
+
+import "google/api/annotations.proto";
+import "rpcoptions.proto";
+
+service ActivityService {
+
+
+    //--------------------------Get Activity Info --------------------------------------
+
+    rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/userinfo/{trader_addr}"
+            additional_bindings { get: "/v1/userinfo" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc GetActivityInfo (GetActivityRequest) returns (GetActivityResponse) {
+        option (google.api.http) = {
+            get: "/v1/activityinfo/{trader_addr}"
+            additional_bindings { get: "/v1/activityinfo" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: false
+        };
+    }
+
+    // Get the activity award
+    rpc GetActivityAward (GetActivityAwardRequest) returns (GetActivityAwardResponse) {
+        option (google.api.http) = {
+            get: "/v1/activityaward/{trader_addr}"
+            additional_bindings { get: "/v1/activityaward" }
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    // Receive the activity award
+    rpc ReceiveAward (ReceiveAwardRequest) returns (ReceiveAwardResponse) {
+        option (google.api.http) = {
+            post: "/v1/receiveaward"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    //-------------------------- Subscribe Active -----------------------------------
+
+    // 查询活动申购的token信息
+    rpc GetActivitySubscribe (GetActivitySubscribeRequest) returns (GetActivitySubscribeResponse) {
+        option (google.api.http) = {
+        get: "/v1/activity/subscribe"
+        };
+        option (dfe.rpc_option) = {
+        auth_required: false
+        };
+    }
+
+    // 条件活动申购的token信息
+    rpc TokenSubscribe (TokenSubscribeRequest) returns (GetSubscribeResponse) {
+        option (google.api.http) = {
+            post: "/v1/activity/subscribe"
+            body: "*"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+
+    rpc GetSubscribe (GetSubscribeRequest) returns (GetSubscribeResponse) {
+        option (google.api.http) = {
+            get: "/v1/activity/subscribe/{trader_addr}"
+        };
+        option (dfe.rpc_option) = {
+            auth_required: true
+        };
+    }
+}
+
+message ActivityServiceEnum {
+    enum Rpc {
+        GetUserInfo=0;
+        GetActivityInfo =1;
+        GetActivityAward =2;
+        ReceiveAward=3;
+        GetActivitySubscribe=4;
+        TokenSubscribe=5;
+        GetSubscribe = 6;
+    }
+}
+//-------------------------- Subscribe Active -----------------------------------
+
+message GetActivitySubscribeRequest {
+
+}
+
+message GetActivitySubscribeResponse {
+string token_symbol = 1 [json_name = "token_symbol"];
+string token_desc =2 [json_name = "token_desc"];
+string website=3 [json_name = "website"];
+string whitepaper=4  [json_name = "whitepaper"];
+string phase=5 [json_name = "phase"];
+string chain_token=6 [json_name = "chain_token"];
+string token_total = 7 [json_name = "token_total"];
+string min_limit=8 [json_name = "min_limit"];
+string max_limit=9 [json_name = "max_limit"];
+string start_time=10 [json_name = "start_time"];
+string market_valuation=11 [json_name = "market_valuation"];
+string market_cap = 12 [json_name = "market_cap"];
+string total_supply = 13 [json_name = "total_supply"];
+string opensource_type = 14 [json_name = "opensource_type"];
+string token_type = 15 [json_name = "total_supply"];
+string registry_countries = 16 [json_name = "registry_countries"];
+string ico_price = 17 [json_name = "ico_price"];
+string subscribe_rate=18 [json_name = "subscribe_rate"];
+string activity_id = 19 [json_name = "activity_id"];
+}
+
+message TokenSubscribeRequest {
+string bibox_uid = 1 [json_name = "bibox_uid"];
+string trader=2 [json_name = "trader"];
+string user_from=3  [json_name = "user_from"];
+string token_symbol=4 [json_name = "token_symbol"];
+string subscribe_cnt=5 [json_name = "subscribe_cnt"];
+string activity_id = 6 [json_name = "activity_id"];
+string chain = 7 [json_name = "chain"];
+}
+
+message GetSubscribeRequest {
+string trader_addr = 1;
+}
+
+message GetSubscribeResponse {
+string bibox_uid = 1 [json_name = "bibox_uid"];
+string trader=2 [json_name = "trader"];
+string user_from=3  [json_name = "user_from"];
+string token_symbol=4 [json_name = "token_symbol"];
+string discount_rate=5 [json_name = "discount_rate"];
+string hold_amount = 6 [json_name = "hold_amount"];
+string subscribe_token_cnt=7 [json_name = "subscribe_token_cnt"];
+string subscribe_cnt=8 [json_name = "subscribe_cnt"];
+string assigned_cnt=10 [json_name = "assigned_cnt"];
+string assigned_token_cnt = 11 [json_name = "assigned_token_cnt"];
+string create_time = 12 [json_name = "create_time"];
+}
+
+
+//-------------------------- Get Activity info  -----------------------------
+
+
+message GetUserInfoRequest {
+    string trader_addr = 1;
+}
+
+message GetUserInfoResponse {
+    int64 isnew = 1;
+    string eos_login_reward = 2;
+}
+
+
+
+message GetActivityRequest {
+string trader_addr = 1;
+}
+
+message GetActivityResponse {
+Activity activity = 1;
+int64 activity_reward = 2;
+}
+
+message GetActivityAwardRequest {
+string trader_addr = 1;
+}
+
+message GetActivityAwardResponse {
+repeated ActivityAward awards = 1;
+}
+
+message ReceiveAwardRequest {
+int64 id = 1;
+string user_address = 2;
+int64 status = 3;
+}
+
+message ReceiveAwardResponse {
+ActivityAward award = 1;
+}
+
+
+
+
+//--------------------------  Activity  Data   -----------------------------
+
+message Activity{
+    int64 id=1;
+    string pair_id =2;
+    int64 start_time_sec = 3;
+    int64 end_time_sec =4;
+    int64 increment =5;
+    int64 reward=6;
+    int64 max_reward=7;
+    string desc =8;
+    int64 create_time =9;
+    int64 init_reward =10;
+    string taker_addr =11;
+    string maker_addr = 12;
+}
+
+message ActivityLog{
+    int64 id=1;
+    int64 activity_id = 2;
+    int64 trade_id =3;
+    int64 count_down_sec =4;
+    int64 volume_e8=5;
+    int64 reward=6;
+    int64 create_time =7;
+    string taker_adrr =8;
+    string maker_adrr = 9;
+    string maker_is_buyer =10;
+}
+
+message LuckyTower{
+    int64 tower_hight=1; // 塔高
+    int64 tower_floor = 2; // 当前层数
+    int64 eos_luckybag_totle =3;
+    int64 eos_reward_totle =4;
+    int64 eth_luckybag_totle=5;
+    int64 eth_reward_totle=6;
+    map<string, int64> ranking_list = 7;  // 排行榜
+}
+
+message ActivityAward {
+    int64 id = 1;
+    string activity = 2;
+    string user_address = 3;
+    string token_symbol = 4;
+    float amount_e8 = 5;
+    int64 status = 6;
+    int64 type = 7;
+}

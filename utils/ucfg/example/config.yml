@@ -1,0 +1,9 @@
+---
+example:
+  foo:
+    url: redis:6379
+
+  bar:
+    addr: mysql:3307
+    user: dexter
+    password: dexter

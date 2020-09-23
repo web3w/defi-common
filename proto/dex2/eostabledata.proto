@@ -1,0 +1,178 @@
+// 该文件中主要定义EOS相关表操作时用到的表定义，方便各个项目互通。
+
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+// zone_config表。
+message ZoneConfigRow {
+    uint64 id = 1;
+    uint64 cash_token_id = 2;
+    string cash_token_symbol = 3;
+    string chain_token = 4;
+    string market_addr = 5;
+    uint64 maker_fee_rate_e4 = 6;
+    uint64 taker_fee_rate_e4 = 7;
+    uint64 withdraw_fee_e4 = 8;
+    uint64 update_time = 9;
+}
+
+// coin_type表，币种信息
+message CoinType {
+    uint64 id = 1;
+    string token_symbol = 2;
+    string token_name = 3;
+    string chain_token = 4;
+    int32 chain_decimals = 5;
+    string website = 6;
+    string token_addr = 7;
+    string token_url = 8;
+    string token_logo = 9;
+    string init_price = 10;
+    string total_amount = 11;
+    string circulation = 12;
+    string desc_en = 13;
+    string desc_zh = 14;
+    int64 deposit_min_amount_e8 = 15;
+    int64 withdraw_min_amount_e8 = 16;
+    int32 weight = 17;
+    int64 trading_start_time_sec = 18;
+    int64 delist_time_sec = 19;
+    int64 enable_time_sec = 20;
+    int64 create_time = 21;
+    int64 update_time = 22;
+
+}
+
+// coin_pair表。
+message CoinPairRow {
+    uint64 id = 1;
+    uint64 cash_token_id = 2;
+    string cash_token_symbol = 3;
+    uint64 stock_token_id = 4;
+    string stock_token_symbol = 5;
+    string chain_token = 6;
+    int32 valid_decimals = 7;
+    int64 order_min_amount_e8 = 8;
+    int64 order_min_value_e8 = 9;
+    int32 status = 10;
+    int64 create_time = 11;
+    int64 update_time = 12;
+}
+
+// contract_operate_sync表。
+message ContractOperateSyncRow {
+    int64 order_id = 1;
+    int32 type = 2;
+    string trader = 3;
+    int64 book_id = 4;
+    int64 cancel_book_id = 5;
+    int32 status = 6;
+}
+
+// match_sequence表。
+message GeneralMatchSequenceRow {
+    uint64 id = 1;
+    string cash_token_symbol = 2;
+    string stock_token_symbol = 3;
+    string chain_token = 4;
+    int64 sequence = 5;
+}
+
+// eos_order_match表。
+message EosOrderMatchRow {
+    uint64 id = 1;
+    int64 order_id = 2;
+    string order_trader = 3;
+    int64 book_id = 4;
+    int32 type = 5;
+    int64 match_order_id = 6;
+    string match_order_trader = 7;
+    int64 match_book_id = 8;
+    string cash_token_symbol = 9;
+    string stock_token_symbol = 10;
+    string chain_token = 11;
+    int64 sequence = 12;
+    uint64 create_time = 13;
+    int32 status = 14;
+    uint64 price = 15;
+    uint64 match_price = 16;
+    uint64 amount = 17;
+    uint64 match_amount = 18;
+}
+
+// eos_order_pending表。
+message EosOrderPendingRow {
+    uint64 id = 1;
+    string trader = 2;
+    int64 order_id = 3;
+    int64 book_id = 4;
+    int64 match_order_id = 5;
+    int64 match_book_id = 6;
+    int32 direction = 7;
+    int32 side = 8;
+    int32 type = 9;
+    string stock_token_symbol = 10;
+    string cash_token_symbol = 11;
+    string chain_token = 12;
+    uint64 price_e8 = 13;
+    uint64 amount_e8 = 14;
+    uint64 total_e8 = 15;
+    uint64 fee_rate_e4 = 16;
+    string fee_token_symbol = 17;
+    uint64 fee_e8 = 18;
+    uint64 create_time = 19;
+}
+
+// eos_orders表。
+message EosOrdersRow {
+    int64 order_id = 1;
+    string trader = 2;
+    int64 book_id = 3;
+    int32 action = 4;
+    int32 type = 5;
+    uint64 stock_token_id = 6;
+    string stock_token_symbol = 7;
+    uint64 cash_token_id = 8;
+    string cash_token_symbol = 9;
+    string chain_token = 10;
+    uint64 price_e8 = 11;
+    uint64 amount_total_e8 = 12;
+    uint64 amount_left_e8 = 13;
+    uint64 accumulated_fund_e8 = 14;
+    string order_sign = 15;
+    int64 create_time = 16;
+    int64 expire_time = 17;
+    int64 update_time = 18;
+    int32 status = 19;
+}
+
+// user_asset用户资产记录表。
+message UserAssetRow {
+    uint64 id = 1;
+    string trader = 2;
+    int64 token_id = 3;
+    string token_symbol = 4;
+    string chain_token = 5;
+    uint64 total_e8 = 6;
+    uint64 freeze_e8 = 7;
+}
+
+// 用户充提记录 eos_deposits eos_withdraws。
+message UserIoRow {
+    int64 id = 1;
+    int64 index = 2;
+    int64 block_number = 3;
+    string tx_hash = 4;
+    string trader = 5;
+    uint64 token_id = 6;
+    string chain = 7;
+    string token_symbol = 8;
+    uint64 amount = 9;
+    int32 status = 10;
+    int64 create_time = 11;
+    int64 update_time = 12;
+}
+

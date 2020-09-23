@@ -1,0 +1,126 @@
+// 通用配置对象。
+// 主要用于： 1. 数据同步任务和前端缓存数据交互；2. 交易服务和网关之间通信？
+
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+// 通用市场配置。
+message GeneralMarketConfig {
+    uint64 maker_fee_rate_e4 = 1; // e.g. 10 means 10 / 1e4 = 0.001
+    uint64 taker_fee_rate_e4 = 2;
+    uint64 withdraw_fee_e4 = 3; // does not affect the off-chain balances
+
+    // The tokens that are can be used as cash in this market.
+    CoinTypeSimple cash_tokens = 5;
+
+    // The tokens that can be traded as stock in this market.
+    repeated CoinTypeSimple stock_tokens = 6;
+
+    // The tokens that can neither be used as cash, nor be used as stock.
+    repeated CoinTypeSimple disabled_tokens = 7;
+}
+
+// 币种简要信息
+message CoinTypeSimple {
+    uint64 id = 1; // e.g., "ETH", "ADX"
+    string token_symbol = 2; // 0 is always ETH.
+    string token_name = 3;
+    string chain_token = 4;
+    string token_addr = 5; // ERC20 token address
+    uint64 scale_factor = 6;
+}
+
+// 通用订单。
+message GeneralOrder {
+    // 行为： 买入、卖出、取消。
+    enum Action {
+        Buy = 0;
+        Sell = 1;
+        Cancel = 2;
+    }
+
+    // 订单类型： 限价单、市价单。
+    enum OrderType {
+        Fixed = 0;
+        Market = 1;
+    }
+
+    // Transition:
+    //           Pending  =>        Unfilled | Rejected
+    //          Unfilled  => PartiallyFilled | Cancelled | Expired
+    //   PartiallyFilled  =>          Filled | PartiallyCancelled | PartiallyExpired
+    enum Status {
+        NewOrder = 0;
+
+        //--- active status: ---
+        // (`Pending` status is NOT supported yet, new orders directly become `Unfilled`.)
+        // Pending = 1;  // Not added to the orderbook yet. Cannot be cancelled directly.
+
+        Unfilled = 2;
+        PartiallyFilled = 3;
+
+        //--- inactive status: ---
+        Rejected = 4;
+        Filled = 5;
+        Cancelled = 6; // the result of cancelling an unfilled order
+        PartiallyCancelled = 7; // the result of cancelling a partially filled order
+        Expired = 8; // the result that an unfilled order expired
+        PartiallyExpired = 9; // the result that a partially filled order expired
+    }
+
+    //----------------------------- Constant Fields ----------------------------------------
+
+    // The id of the order, which is a positive value. An earlier order has a lower id.
+    int64 order_id = 1;
+    // 下单人
+    string trader = 2;
+
+    int64 book_id = 3;
+
+    Action action = 4;
+
+    OrderType type = 5;
+
+    // 交易币id和symbol。
+    uint64 stock_token_id = 6;
+    string stock_token_symbol = 7;
+
+    // 计价币id和symbol。
+    uint64 cash_token_id = 8;
+    string cash_token_symbol = 9;
+
+    string chain_token = 10;
+
+    // 挂单价格。
+    uint64 price_e8 = 11;
+
+    // 挂单总数量。
+    uint64 amount_total_e8 = 12;
+
+    // 挂单总资产。
+    uint64 accumulated_fund_e8 = 13;
+
+    // 订单签名。
+    string order_sign = 14;
+
+    // Do NOT use create time to check which order is accepted earlier. Use order id instead.
+    int64 create_time = 15;
+
+    int64 expire_time = 17;
+
+    //----------------------------- Changing Fields ----------------------------------------
+
+    int64 update_time = 16;
+
+    Status status = 18;
+
+    // 剩余未成交数量。
+    uint64 amount_left_e8 = 19;
+    // 订单来源
+    string user_from = 20;
+}
+
+

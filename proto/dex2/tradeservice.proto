@@ -1,0 +1,334 @@
+// Notes:
+// - Each trading request must be signed by the private key of the trader address.
+//
+// - Nonce:
+//     A trading request must have a nonce in it. The nonces of all the requests of an account must
+//   be strictly ascending, otherwise the request will the rejected (by DEx server and by the smart
+//   contract). This is to make sure that requests with identical content have distinct signatures.
+//     The initial value of nonce is 0. It is recommended to use the timestamp in millisecond as the
+//   nonce of a request. An implementation should check that a nonce is no larger than 5e18, in case
+//   no larger nonce can be used to clean up the account, e.g. withdraw all balances.
+
+syntax = "proto3";
+
+package dex;
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+
+import "google/api/annotations.proto";
+import "tradedata.proto";
+import "ledgerstate.proto";
+import "tradeevent.proto";
+
+service TradeService {
+  // NOTE:
+  // - When adding a new RPC method update TradeServiceEnum as well.
+
+  // DEPRECATED: the market is always created when making a new ledger.
+  rpc CreateMarket (CreateMarketRequest) returns (CreateMarketResponse);
+
+  rpc SetTokenInfo (SetTokenInfoRequest) returns (SetTokenInfoResponse);
+
+  rpc SetFeeRates (SetFeeRatesRequest) returns (SetFeeRatesResponse);
+
+  // Add a deposit has been well confirmed on the blockchain.
+  //
+  // Can only be called by the ChainDaemon. TODO: enfore this.
+  rpc AddDeposit (AddDepositRequest) returns (AddDepositResponse);
+
+  rpc InitiateWithdraw (InitiateWithdrawRequest) returns (InitiateWithdrawResponse);
+
+  rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+
+  rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+
+  rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+
+  rpc GetOrdersOfTrader (GetOrdersOfTraderRequest) returns (GetOrdersOfTraderResponse);
+
+  rpc GetDepth (GetDepthRequest) returns (GetDepthResponse);
+
+  // Get information of the market.
+  rpc GetMarket (GetMarketRequest) returns (GetMarketResponse);
+
+  // streaming response
+  rpc ListenEvents (ListenEventsRequest) returns (stream ListenEventsResponse) {};
+
+  rpc PushLogicTime (PushLogicTimeRequest) returns (PushLogicTimeResponse) {};
+
+  // Cancel orders of the specified trading pair and trader.
+  rpc CancelOrdersByIds (CancelOrdersByIdsRequest) returns (CancelOrdersByIdsResponse) {};
+
+  rpc GetServerTime (GetServerTimeRequest) returns (GetServerTimeResponse) {
+    option (google.api.http) = {
+      get: "/v1/servertime"
+    };
+  };
+}
+
+message TradeServiceEnum {
+  enum Rpc {
+    UnknownRpc = 0;
+    CreateMarket = 1;  // Method Deprecated
+    SetTokenInfo = 2;
+    SetFeeRates = 3;
+    AddDeposit = 4;
+    InitiateWithdraw = 5;
+    PlaceOrder = 6;
+    GetAccount = 7;
+    GetOrdersOfTrader = 8;
+    GetDepth = 9;
+    GetMarket = 10;
+    CancelOrder = 11;
+    ListenEvents = 12;
+    PushLogicTime = 13;
+    CancelOrdersByIds = 14;
+    GetServerTime = 15;
+  }
+}
+
+//----------------------------- CreateMarket -----------------------------------
+
+// Method Deprecated
+message CreateMarketRequest {
+  string market_addr = 1;
+  MarketLabel label = 2;
+}
+
+// Error information, if any, will be returned as status.
+message CreateMarketResponse {
+}
+
+//----------------------------- SetTokenInfo -----------------------------------
+
+// Disallow changing an existing token info (identified by `token_id`).
+message SetTokenInfoRequest {
+  TokenInfo token_info = 1;
+
+  reserved 2, 3;  // for deprecated fields
+
+  message TokenUsage {
+    bool can_be_used_as_cash = 1;
+    bool can_be_used_as_stock = 2;
+  }
+
+  // When token usage is not set: if the token is not added yet, it will be added as a disabled
+  // token; otherwise nothing will change, but it will compares `token_info` with the existing
+  // token info and returns an error if they mismatch.
+  TokenUsage usage = 4;
+}
+
+message SetTokenInfoResponse {
+}
+
+//----------------------------- SetFeeRates ------------------------------------
+
+message SetFeeRatesRequest {
+  uint64 maker_fee_rate_e4 = 1;
+  uint64 taker_fee_rate_e4 = 2;
+  uint64 withdraw_fee_rate_e4 = 3;
+}
+
+message SetFeeRatesResponse {
+}
+
+//----------------------------- AddDeposit -------------------------------------
+
+// Can only be called by the ChainService.
+
+// AddDeposit must be called with consecutive deposit index. Otherwise an error will be returned.
+message AddDepositRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  string token_id = 3;
+  uint64 amount_e8 = 4;
+
+  // The index of deposit in the smart contract storage.
+  int64 deposit_index = 5;
+}
+
+// Error information, if any, will be returned as status.
+message AddDepositResponse {
+}
+
+//----------------------------- InitiateWithdraw -------------------------------
+
+message InitiateWithdrawRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  string token_id = 3;
+  uint64 amount_e8 = 4;
+}
+
+message InitiateWithdrawResponse {
+}
+
+//----------------------------- PlaceOrder -------------------------------------
+
+  // See `Order` for the field comments.
+message PlaceOrderRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  Order.Action action = 3;
+
+  string cash_token_id = 4; // e.g. "ETH"
+  string stock_token_id = 5; // e.g. "ADX"
+
+  uint64 price_e8 = 6;
+  uint64 amount_e8 = 7;
+
+  int64 expire_time_sec = 8;
+
+  // 用户来源： 登陆签名工具名称。
+  string user_from = 9;
+  // User-Agent
+  string ua = 10;
+
+  // TODO: support IOC
+  //
+  // Any portion of an Immediate-Or-Cancel order that cannot be filled immediately is cancelled. A
+  // partial fulfillment is possible.
+  // bool ioc = 9;
+
+  // Must be within range [0, 5e18]. See the file comment.
+  int64 nonce = 14;
+
+  // The order signature (65 bytes) in the [R || S || V] format where V is 0 or 1.
+  bytes sig = 15;
+}
+
+// Error information, if any, will be returned as status.
+message PlaceOrderResponse {
+  Order order = 1;  // the newly accepted order
+}
+
+//----------------------------- GetAccount -------------------------------------
+
+message GetAccountRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+}
+
+message GetAccountResponse {
+  AccountState account = 1;
+}
+
+//----------------------------- GetOrdersOfTrader ------------------------------
+
+// Currently just get all orders of the trader of the specified trade pair. The result is sorted
+// by order id (ascending).
+//
+// WARNING: This RPC can be expensive. It iterates over all orders of the trading pair.
+message GetOrdersOfTraderRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  string cash_token_id = 3; // e.g. "ETH"
+  string stock_token_id = 4; // e.g. "ADX"
+}
+
+message GetOrdersOfTraderResponse {
+  repeated Order orders = 1;
+}
+
+//----------------------------- GetDepth ---------------------------------------
+
+message GetDepthRequest {
+  string market_addr = 1;
+  string cash_token_id = 2;
+  string stock_token_id = 3;
+
+  int32 size = 4;
+
+  // The price step of merging. 0 or 8 means no merging.
+  int64 merging_decimals = 5; // 0 | 2 | 4 | 5 | 6 | 7 | 8
+}
+
+message GetDepthResponse {
+  Depth depth = 1;
+}
+
+//----------------------------- GetMarket --------------------------------------
+
+message GetMarketRequest {
+}
+
+message GetMarketResponse {
+  string market_addr = 1;
+  MarketLabel label = 2;
+  MarketConfig config = 3;
+}
+
+//---------------------------- CancelOrder ------------------------------------
+
+message CancelOrderRequest {
+  string market_addr = 1;
+  string trader_addr = 2;
+
+  string cash_token_id = 3; // e.g. "ETH"
+  string stock_token_id = 4; // e.g. "ADX"
+
+  int64 order_id = 5;
+
+  int64 nonce = 14;
+}
+
+// Error information, if any, will be returned as status.
+message CancelOrderResponse {
+}
+
+//----------------------------- ListenEvents -----------------------------------
+
+message ListenEventsRequest {
+  // Get events from this event index
+  int64 start_index = 1;
+}
+
+message ListenEventsResponse {
+  repeated TradeEvent events = 1;
+}
+
+//----------------------------- PushLogicTime ----------------------------------
+
+message PushLogicTimeRequest {
+}
+
+message PushLogicTimeResponse {
+  // Logic time in ledger after the request
+  int64 logic_time_ms = 1;
+}
+
+//----------------------------- CancelOrdersByIds ------------------------------
+
+message CancelOrdersByIdsRequest {
+  string trader_addr = 1;
+
+  string cash_token_id = 2; // e.g. "ETH"
+  string stock_token_id = 3; // e.g. "ADX"
+
+  repeated int64 order_ids = 4;
+
+  int64 nonce = 14;
+}
+
+// Notes:
+// - No order is cancelled if an error is returned.
+// - An order will be skipped if it is not found, or has already been cancelled, or does not belong
+//   to the trader. Such cases are not regarded as errors.
+message CancelOrdersByIdsResponse {
+  repeated int64 cancelled_order_ids = 1;
+}
+
+//------------------------------- GetServerTime --------------------------------
+
+message GetServerTimeRequest {
+  bool go_through_raft = 1;
+}
+
+message GetServerTimeResponse {
+  int64 server_time_sec = 1; // return logic time if going through raft system, otherwise return real time.
+}
+

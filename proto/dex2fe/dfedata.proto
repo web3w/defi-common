@@ -1,0 +1,311 @@
+syntax = "proto3";
+
+package dfe;
+
+// ** Please Read README.md for the Conventions **
+
+option go_package = "git.bibox.com/dextop/common.git/proto/dex2fe";
+
+import "git.bibox.com/dextop/common.git/proto/dex2/ledgerstate.proto";
+
+// The information of a trading pair.
+message PairInfo {
+  string pair_id = 1;  // e.g. "ETH_ADX"
+
+  int64 time_ms = 2;
+  string open_price = 3;        // open trade price, e.g. "0.12308900"
+  string last_price = 4;        // last trade price, e.g. "0.10000000"
+  string volume_24 = 5;         // total value in the past 24h, e.g. "25.000" (25.000 ETH turnover in the last 24h)
+  string amount_24 = 6;         // total amount in the past 24h, e.g. "1234.567" (1234.567 ADX turnover in the last 24h)
+  string change_24 = 7;         // price change in the past 24h, e.g. "-1.23512300" (price dropped 1.235123 in the last 24h)
+  string change_percent_24 = 8; // price change percentage in the past 24h, e.g. "-32.129" (price dropped 32.129% in the last 24h)
+  string high_24 = 9;           // highest price in the past 24h, e.g. "0.32000000"
+  string low_24 = 10;           // lowest price in the past 24h, e.g. "0.02000000"
+}
+
+message Depth {
+  string pair_id = 1;  // e.g. "ETH_ADX"
+
+  int64 time_ms = 2;
+
+  // Entries selling the stock token for the cash token. Ascending by price.
+  repeated DepthEntry asks = 3;
+
+  // Entries buying the stock token with the cash token. Descending by price.
+  repeated DepthEntry bids = 4;
+}
+
+message DepthEntry {
+  // The price level of the this entry.
+  string price = 1;
+
+  // The total amount of stock token available at this price.
+  string amount = 2;
+
+  // The total value of the trade which is `price` * `amount`
+  string total_value = 3;
+
+  // The total value summed up till this price level.
+  string sum_value = 4;
+}
+
+message TokenBalance {
+  string token_id = 1;
+  string total = 2;
+  string active = 3;
+  string locked = 4;
+  string withdrawing = 5;
+}
+
+message TradeRecord {
+  string pair_id = 1;
+  int64 time_ms = 2;
+
+  // From which trader's view is context dependent.
+  dex.Order.Action action = 3;
+
+  // The trade price.
+  string price = 4;
+
+  // The amount fulfilled of each side in this trade.
+  string amount = 5;
+
+  // Total value of the trade which is `price` * `amount`
+  string value = 6;
+
+  // TODO: Add status of this trade: uploading-to-blockchain, etc.
+}
+
+message MyTrade {
+  string pair_id = 1;
+  int64 time_ms = 2;
+
+  int64 order_id = 3;
+  bool is_buyer = 4;
+  bool is_maker = 5;
+
+  string price = 6;
+  string amount = 7;
+  string fee = 8;
+}
+
+// Transfer
+message Transfer {
+
+  enum Action {
+    UnknownAction = 0;
+    Deposit = 1;
+    Withdraw = 2;
+  }
+
+  int64 time_ms = 1;
+  Action action = 2;
+
+  // The id of the transferred token.
+  string token_id = 3;
+
+  // The amount transferred.
+  string amount = 4;
+
+  // The balance (including locked part) after the transfer.
+  string balance = 5;
+
+  // Deposit - "Confirming" | "Done"
+  // Withdraw - "Confirming" | "Confirmed" | "Done"
+  string status = 6;
+
+  // The transaction hash of a deposit.
+  string deposit_tx = 7;
+
+  // The block number of a deposit
+  int64 deposit_block_number = 8;
+}
+
+// TradingConfig
+message TradingConfig {
+  // Maximum open orders per trader.
+  int32 max_open_orders_per_trader = 1;
+
+  // The minimum ttl for new orders.
+  int64 min_new_order_ttl_sec = 2;
+
+  // Keyed by token id, i.e. token symbol.
+  map<string, TokenLimit> tokens = 3;
+}
+
+message TokenLimit {
+  // The minimum amount of tokens for new order.
+  double min_place_order_amount = 1;
+
+  // The minimum value of new order. Set this value when a token is used as cash, e.g. ETH.
+  double min_place_order_value = 2;
+
+  // The minimum deposit amount of token.
+  double min_deposit_amount = 3;
+
+  // The minimum amount of token withdrawals.
+  double min_withdraw_amount = 4;
+
+  int64 trading_start_time_sec = 5; // trading start time
+
+  // Token will be delisted (NO LONGER support deposit, withdrawal or trading) at this time.
+  // Deposit and trading closes at `delist_time_sec` - 30days
+  int64 delist_time_sec = 7;
+
+  int64 enable_time_sec = 8;
+}
+
+message Order {
+  int64 order_id = 1;
+  string pair_id = 2;
+
+  dex.Order.Action action = 3;
+  string price = 4;
+  string amount_total = 5;
+  string amount_filled = 6;
+  string filled_average_price = 7;
+  dex.Order.Status status = 8;
+  int64 create_time_ms = 9;
+  int64 update_time_ms = 10;
+  int64 expire_time_sec = 11;
+  int64 nonce = 15;
+  int64 book_id = 16;
+}
+
+message User{
+  int64 id = 1;
+  string email = 2;
+  bool email_verified = 4;
+}
+
+message AddrBinding {
+  // Trader address, e.g. "0x1B38C16a23269Ef3D776A16B46b0f2f160Fcf7FC".
+  string addr = 1;
+
+  // The user id which `addr` is bound to.
+  int64 uid = 2;
+}
+
+// A rate limit that at most `num` occurrences within `windowSec`.
+message RateLimit {
+  int64 windowSec = 1;
+  int64 num = 2;
+}
+
+//message TopTrader {
+//  string email = 1;
+//  string trader_addr = 2;
+//  string trading_volume = 3;
+//}
+
+message BannerConfig {
+  repeated Campaign campaigns = 1;
+}
+
+message Campaign {
+  int32 type = 1; // "banner" | "media"
+  string lang = 2; // "en" | "zh"
+  string image_url = 3;
+  string thumbnail_url = 4;
+  string article_url = 5;
+  string bg_color = 6;
+  int32 order_num = 7;
+  int64 start_time_sec = 8;
+  int64 end_time_sec = 9;
+}
+
+message MarketConfig {
+  uint64 maker_fee_rate_e4 = 1;  // e.g. 10 means 10 / 1e4 = 0.001
+  uint64 taker_fee_rate_e4 = 2;
+  uint64 withdraw_fee_rate_e4 = 3;  // does not affect the off-chain balances
+
+  // The tokens that are can be used as cash in this market.
+  repeated TokenInfo cash_tokens = 5;
+
+  // The tokens that can be traded as stock in this market.
+  repeated TokenInfo stock_tokens = 6;
+}
+
+message TokenInfo {
+  string token_id = 1; // e.g., "ETH", "ADX"
+  string token_name = 2; // e.g., "AdEx"
+  uint32 token_code = 3; // 0 is always ETH.
+  string token_addr = 4; // ERC20 token address
+  uint64 scale_factor = 5;
+}
+
+message TokenMetadata {
+  message Description {
+    string en=1;
+    string zh=2;
+  }
+
+  message Reporter {
+    string report = 1;
+    string reporter = 2;
+    string reporter_site = 3;
+    string reporter_logo = 4;
+  }
+
+  string token_id = 1;
+  string token_name = 2;
+  string token_addr = 3;
+  repeated string tags = 4;
+  Description description = 5;
+  string init_price = 6;
+  string total_amount = 7;
+  string circulation = 8;
+  string gas_limit = 9;
+  string token_logo = 10;
+  string website = 11;
+  repeated Reporter reporters = 12;
+}
+
+message NotificationConfig {
+  repeated Notification notifications = 1;
+}
+
+message Notification {
+  string title = 1;
+  string lang = 2; // "en" | "zh"
+  string article_url = 3;
+  int32 order_num = 4;
+  int64 start_time_sec = 5;
+  int64 end_time_sec = 6;
+}
+
+// SimpleWallet钱包回调信息。
+message SimpleWalletCallBack{
+  string protocol = 1;
+  string version = 2;
+  string blockchain = 3;
+  int64 timestamp = 4;
+  string sign = 5;
+  string uuID = 6;
+  string account = 7;
+  string ref = 8;
+}
+
+// simple_wallet_record表中的记录。
+message SimpleWalletRecord{
+  int64 id = 1;
+  string uuid = 2;
+  int32 action = 3;
+  int32 status = 4;
+  string data = 5;
+  int64 create_time = 6;
+  int64 expire_time = 7;
+}
+
+message AppInfo {
+    string version = 1;
+    string version_url = 2;
+    string download_url = 3;
+    int64  status = 4;
+    string comment = 5;
+    string comment_en = 7;
+    string platform = 8;
+    string createTime = 9;
+
+}
+
