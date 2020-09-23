@@ -1,0 +1,185 @@
+package dex2
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestParseOpsSimple(t *testing.T) {
+	header := "0x5AA395130000000000000003" // newLogicTimeSec: 1520669971, beginIndex: 3
+	body := []string{
+		"0x16211241b35d299001b8d7e7797c30f4303313c6775bc86d4711bde03",
+		"0x5aa56541000000003b9aca000000000000989680000000000064",
+		"0x50df1490fb24aba485168313bc911e47c270de5f72a0ae6225a9a12fc0cef28e",
+		"0x764a96812d4601dd0c510b3f5343b108a652afcdb74ae9f000714e61a71b0122",
+		"0x162112471d8d299001b8d7e7797c30f4303313c6775bc86d4711b",
+		"0x5aa565570000000023c3460000000000007a1200000100000064",
+		"0x35176ce99ec7c433e54e6f8734099102a48bc5fed03143497d24b71b1eb7db36",
+		"0x5cc4420e23ecfcbf2b9524d3b6d33d10d50fd993559358ad7950536eaa3f7a94"}
+
+	expected := `
+newLogicTimeSec: 1520669971
+beginIndex: 3
+len(body): 8
+operation MatchOrder:
+  makerOrder (new, v1=27):
+    trader: 0xd299001b8d7e7797c30f4303313c6775bc86d471
+    nonce: 1520706001717
+    pairId  : 100
+    action  : 0
+    ioc     : 0
+    priceE8 : 10000000
+    amountE8: 1000000000
+    expire  : 1520788801
+    s       : 0x50df1490fb24aba485168313bc911e47c270de5f72a0ae6225a9a12fc0cef28e
+    t       : 0x764a96812d4601dd0c510b3f5343b108a652afcdb74ae9f000714e61a71b0122
+  takerOrder (new, v2=27):
+    trader: 0xd299001b8d7e7797c30f4303313c6775bc86d471
+    nonce: 1520706023896
+    pairId  : 100
+    action  : 1
+    ioc     : 0
+    priceE8 : 8000000
+    amountE8: 600000000
+    expire  : 1520788823
+    s       : 0x35176ce99ec7c433e54e6f8734099102a48bc5fed03143497d24b71b1eb7db36
+    t       : 0x5cc4420e23ecfcbf2b9524d3b6d33d10d50fd993559358ad7950536eaa3f7a94
+`
+	expected = expected[1:] // remove the extra leading \n
+
+	parsed, err := ParseOpsFromHex(header, body)
+	t.Log("-------------- Parsed: -----------------\n", parsed)
+	require.NoError(t, err)
+	require.Equal(t, expected, parsed)
+}
+
+func TestParseMultipleOpsFromTxInputHex(t *testing.T) {
+	txInput := "0x722ded24" +
+		"00000000000000000000000000000000000000005af6e88b00000000000001fd" +
+		"0000000000000000000000000000000000000000000000000000000000000040" +
+		"000000000000000000000000000000000000000000000000000000000000001b" +
+		"0000000163546e7cf4c6caf90ab9a8981e390b5aa101d5a8b03b23d4781bde03" +
+		"0000000000005b001f7d00000001836e2100000000000001359c000100000064" +
+		"33323c16b74e5c6fe36ba0cd63922a5b78bd56ec0a6464affad4a39a916f7e6c" +
+		"7844e2c179866d667f16b831948aa1a20cd9088d668fdf962bf11465e0934cea" +
+		"00000000000163547c48c33265ba2682d5340228f7c4223dd6928a929018b91b" +
+		"0000000000005b00230500000001836e2100000000000001359c000000000064" +
+		"9f1e221614294805d0e241a5ded1ff0deea1a06ae9a671360a2e3d30f716939e" +
+		"46fe5bbf828b4f17e6b229f93d0a564b036720fd16213eaddd2ddb13943c1487" +
+		"00000001635473c6a456613e853c15cc12940a28ed5fd36de3feb0c74b00de03" +
+		"00000000000163547ec46256613e853c15cc12940a28ed5fd36de3feb0c74b1b" +
+		"0000000000005b0023a80000000419bfcfd5000000000001352e000100000064" +
+		"69c3127e436d0409cb70449d921b89ba7e25e667ca4655583fd4d0c776394dd1" +
+		"0670fb35179e6e2b973af7be46b8b4788e5765e43bc2edfcd62dc7e6473f678c" +
+		"0000000005d75c800000c6caf90ab9a8981e390b5aa101d5a8b03b23d478de02" +
+		"0000000163546f101fc6caf90ab9a8981e390b5aa101d5a8b03b23d4781bde03" +
+		"0000000000005b001fa200000001836e210000000000000135c4000100000064" +
+		"228b79282074cc6c53f4bb3d0341aa799043085dcc24670dc926ae49f8b1f00a" +
+		"5ed9dcb5623619bb306fe3c6aa0b918df283f0fb5f8b019ff9bcdd9408e5da46" +
+		"0000000000016354846c59e0f5a9a97159340ab26541d74b3e70cf70359e351b" +
+		"0000000000005b00251a000000027182b75000000000000135c4000000000064" +
+		"9345ab7be38818544e99152b89d5ffaad7ef22f433b55a7e79174f961ef2a8df" +
+		"5aff578a357bf204c60a08a23bdee393bf076c67bfb83ead32dd9bf35c8ca61f" +
+		"000000016354846c59e0f5a9a97159340ab26541d74b3e70cf70359e3500de03" +
+		"000000000001635484f974e0f5a9a97159340ab26541d74b3e70cf70359e351c" +
+		"0000000000005b00253e00000003d6b3a7c0000000000001352e000100000064" +
+		"f0f8ebbe78c31975f9b3c4affb598572bc84877465ad6aff1ce3f4222a66653f" +
+		"1feba84fa70e317615d4468b722d8527fe7658307dbea931a28c646c0ba5e8ef"
+
+	expected := `
+newLogicTimeSec: 1526130827
+beginIndex: 509
+len(body): 27
+operation MatchOrder:
+  makerOrder (new, v1=27):
+    trader: 0xc6caf90ab9a8981e390b5aa101d5a8b03b23d478
+    nonce: 1526129917172
+    pairId  : 100
+    action  : 1
+    ioc     : 0
+    priceE8 : 79260
+    amountE8: 6500000000
+    expire  : 1526734717
+    s       : 0x33323c16b74e5c6fe36ba0cd63922a5b78bd56ec0a6464affad4a39a916f7e6c
+    t       : 0x7844e2c179866d667f16b831948aa1a20cd9088d668fdf962bf11465e0934cea
+  takerOrder (new, v2=27):
+    trader: 0x3265ba2682d5340228f7c4223dd6928a929018b9
+    nonce: 1526130821315
+    pairId  : 100
+    action  : 0
+    ioc     : 0
+    priceE8 : 79260
+    amountE8: 6500000000
+    expire  : 1526735621
+    s       : 0x9f1e221614294805d0e241a5ded1ff0deea1a06ae9a671360a2e3d30f716939e
+    t       : 0x46fe5bbf828b4f17e6b229f93d0a564b036720fd16213eaddd2ddb13943c1487
+
+operation MatchOrder:
+  makerOrder (existing):
+    trader: 0x56613e853c15cc12940a28ed5fd36de3feb0c74b
+    nonce: 1526130263716
+  takerOrder (new, v2=27):
+    trader: 0x56613e853c15cc12940a28ed5fd36de3feb0c74b
+    nonce: 1526130984034
+    pairId  : 100
+    action  : 1
+    ioc     : 0
+    priceE8 : 79150
+    amountE8: 17611870165
+    expire  : 1526735784
+    s       : 0x69c3127e436d0409cb70449d921b89ba7e25e667ca4655583fd4d0c776394dd1
+    t       : 0x670fb35179e6e2b973af7be46b8b4788e5765e43bc2edfcd62dc7e6473f678c
+
+operation InitiateWithdraw:
+  traderAddr: 0xc6caf90ab9a8981e390b5aa101d5a8b03b23d478
+  tokenCode: 0
+  amountE8: 98000000
+
+operation MatchOrder:
+  makerOrder (new, v1=27):
+    trader: 0xc6caf90ab9a8981e390b5aa101d5a8b03b23d478
+    nonce: 1526129954847
+    pairId  : 100
+    action  : 1
+    ioc     : 0
+    priceE8 : 79300
+    amountE8: 6500000000
+    expire  : 1526734754
+    s       : 0x228b79282074cc6c53f4bb3d0341aa799043085dcc24670dc926ae49f8b1f00a
+    t       : 0x5ed9dcb5623619bb306fe3c6aa0b918df283f0fb5f8b019ff9bcdd9408e5da46
+  takerOrder (new, v2=27):
+    trader: 0xe0f5a9a97159340ab26541d74b3e70cf70359e35
+    nonce: 1526131354713
+    pairId  : 100
+    action  : 0
+    ioc     : 0
+    priceE8 : 79300
+    amountE8: 10494326608
+    expire  : 1526736154
+    s       : 0x9345ab7be38818544e99152b89d5ffaad7ef22f433b55a7e79174f961ef2a8df
+    t       : 0x5aff578a357bf204c60a08a23bdee393bf076c67bfb83ead32dd9bf35c8ca61f
+
+operation MatchOrder:
+  makerOrder (existing):
+    trader: 0xe0f5a9a97159340ab26541d74b3e70cf70359e35
+    nonce: 1526131354713
+  takerOrder (new, v2=28):
+    trader: 0xe0f5a9a97159340ab26541d74b3e70cf70359e35
+    nonce: 1526131390836
+    pairId  : 100
+    action  : 1
+    ioc     : 0
+    priceE8 : 79150
+    amountE8: 16487000000
+    expire  : 1526736190
+    s       : 0xf0f8ebbe78c31975f9b3c4affb598572bc84877465ad6aff1ce3f4222a66653f
+    t       : 0x1feba84fa70e317615d4468b722d8527fe7658307dbea931a28c646c0ba5e8ef
+`
+	expected = expected[1:] // remove the extra leading \n
+
+	parsed, err := ParseOpsFromTxInputHex(txInput)
+	require.NoError(t, err)
+	t.Log("-------------- Parsed: -----------------\n", parsed)
+	require.Equal(t, expected, parsed)
+}
