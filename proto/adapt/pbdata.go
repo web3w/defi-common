@@ -2,10 +2,10 @@ package adapt
 
 import (
 	"fmt"
-	"git.bibox.com/dextop/common.git/dbdata/trade"
-	be "git.bibox.com/dextop/common.git/proto/dex2"
-	pb "git.bibox.com/dextop/common.git/proto/dex2fe"
-	"git.bibox.com/dextop/common.git/utils/numeric"
+	"github.com/gisvr/deif-common/dbdata/trade"
+	be "github.com/gisvr/deif-common/proto/dex2"
+	pb "github.com/gisvr/deif-common/proto/dex2fe"
+	"github.com/gisvr/deif-common/utils/numeric"
 	"strconv"
 )
 

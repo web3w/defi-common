@@ -3,8 +3,8 @@ package unuls
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"git.bibox.com/dextop/common.git/utils/ulog"
-	"git.bibox.com/dextop/common.git/utils/unuls/btcec"
+	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/deif-common/utils/unuls/btcec"
 )
 
 func VerifyRpcSingedMsg(msg string, signed string, address string) bool {

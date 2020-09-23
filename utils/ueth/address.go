@@ -1,7 +1,7 @@
 package ueth
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"

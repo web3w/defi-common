@@ -2,12 +2,12 @@ package calc
 
 import (
 	"errors"
-	"git.bibox.com/dextop/common.git/dbdata/trade"
+	"github.com/gisvr/deif-common/dbdata/trade"
 	"math"
 	"math/big"
 
-	"git.bibox.com/dextop/common.git/utils/ubig"
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ubig"
+	"github.com/gisvr/deif-common/utils/ulog"
 )
 
 // Get the amount (multiplied by 1e8) of cash required to buy the given amount of stock at the given

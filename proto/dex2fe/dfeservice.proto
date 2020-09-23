@@ -4,10 +4,10 @@ package dfe;
 
 // ** Please Read README.md for the Conventions **
 
-option go_package = "git.bibox.com/dextop/common.git/proto/dex2fe";
+option go_package = "github.com/gisvr/deif-common/proto/dex2fe";
 
 import "google/api/annotations.proto";
-import "git.bibox.com/dextop/common.git/proto/dex2/ledgerstate.proto";
+import "github.com/gisvr/deif-common/proto/dex2/ledgerstate.proto";
 import "dfedata.proto";
 import "rpcoptions.proto";
 

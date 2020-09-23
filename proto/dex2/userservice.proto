@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package dex;
 
-option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+option go_package = "github.com/gisvr/deif-common/proto/dex2";
 
 import "userdata.proto";
 

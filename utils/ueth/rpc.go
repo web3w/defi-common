@@ -4,8 +4,8 @@ package ueth
 
 import (
 	"context"
-	"git.bibox.com/dextop/common.git/utils/ulog"
-	"git.bibox.com/dextop/common.git/utils/utime"
+	"github.com/gisvr/deif-common/utils/ulog"
+	"github.com/gisvr/deif-common/utils/utime"
 	"math/big"
 	"sort"
 	"strconv"

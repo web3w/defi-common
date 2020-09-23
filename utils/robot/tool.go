@@ -2,7 +2,7 @@ package robot
 
 import (
 	"encoding/json"
-	"git.bibox.com/dextop/common.git/utils/uhttp"
+	"github.com/gisvr/deif-common/utils/uhttp"
 )
 
 /**

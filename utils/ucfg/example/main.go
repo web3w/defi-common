@@ -1,8 +1,8 @@
 package main
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ucfg"
-	"git.bibox.com/dextop/common.git/utils/ucfg/example/foo"
+	"github.com/gisvr/deif-common/utils/ucfg"
+	"github.com/gisvr/deif-common/utils/ucfg/example/foo"
 	"github.com/spf13/viper"
 )
 

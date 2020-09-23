@@ -3,7 +3,7 @@ package orderbook
 import (
 	"testing"
 
-	"git.bibox.com/dextop/common.git/utils/utest"
+	"github.com/gisvr/deif-common/utils/utest"
 )
 
 type ExpiryQueueTest struct {

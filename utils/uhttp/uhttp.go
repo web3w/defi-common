@@ -1,7 +1,7 @@
 package uhttp
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"io/ioutil"
 	"net/http"
 	"net/url"

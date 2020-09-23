@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chain;
 
-option go_package = "git.bibox.com/dextop/common.git/proto/chain";
+option go_package = "github.com/gisvr/deif-common/proto/chain";
 
 // Must be synced with `PlaceOrderRequest`.
 message Order {

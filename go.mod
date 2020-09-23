@@ -1,4 +1,4 @@
-module git.bibox.com/dextop/common.git
+module github.com/gisvr/deif-common
 
 require (
 	github.com/CityOfZion/neo-go v0.60.0

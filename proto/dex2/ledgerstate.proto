@@ -5,7 +5,7 @@ syntax = "proto3";
 
 package dex;
 
-option go_package = "git.bibox.com/dextop/common.git/proto/dex2";
+option go_package = "github.com/gisvr/deif-common/proto/dex2";
 
 // LedgerState is a normalized representation of a ledger. Every field of the ledger can be
 // retrieved or derived from the LedgerState message.

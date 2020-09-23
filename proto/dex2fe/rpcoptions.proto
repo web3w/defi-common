@@ -4,7 +4,7 @@ package dfe;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "git.bibox.com/dextop/common.git/proto/dex2fe";
+option go_package = "github.com/gisvr/deif-common/proto/dex2fe";
 
 message RpcOption {
   bool auth_required = 1;

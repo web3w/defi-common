@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ucfg"
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ucfg"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/spf13/viper"

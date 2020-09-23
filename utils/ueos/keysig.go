@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"github.com/eoscanada/eos-go"
 	"github.com/eoscanada/eos-go/ecc"
 )

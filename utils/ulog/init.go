@@ -1,7 +1,7 @@
 package ulog
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ucfg"
+	"github.com/gisvr/deif-common/utils/ucfg"
 	"github.com/spf13/viper"
 )
 

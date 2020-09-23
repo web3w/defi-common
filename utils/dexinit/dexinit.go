@@ -2,8 +2,8 @@ package dexinit
 
 import (
 	"bytes"
-	"git.bibox.com/dextop/common.git/utils/ucfg"
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ucfg"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"io/ioutil"
 	"os"
 	"path"

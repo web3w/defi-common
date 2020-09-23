@@ -2,7 +2,7 @@ package ueth
 
 import (
 	"context"
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/core/types"

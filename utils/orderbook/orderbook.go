@@ -1,8 +1,8 @@
 package orderbook
 
 import (
-	"git.bibox.com/dextop/common.git/dbdata/trade"
-	pb "git.bibox.com/dextop/common.git/proto/dex2"
+	"github.com/gisvr/deif-common/dbdata/trade"
+	pb "github.com/gisvr/deif-common/proto/dex2"
 )
 
 const MAX_DEPTH_ENTRY_AMOUNT_E8 = 1e9*1e8 - 1 // original amount 999,999,999.99999999

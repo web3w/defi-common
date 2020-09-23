@@ -1,7 +1,7 @@
 package utest_test
 
 import (
-	"git.bibox.com/dextop/common.git/utils/utest"
+	"github.com/gisvr/deif-common/utils/utest"
 	"testing"
 )
 

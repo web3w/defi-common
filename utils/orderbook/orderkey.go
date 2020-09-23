@@ -1,7 +1,7 @@
 package orderbook
 
 import (
-	"git.bibox.com/dextop/common.git/dbdata/trade"
+	"github.com/gisvr/deif-common/dbdata/trade"
 )
 
 // The key of an order is <price, orderId>.

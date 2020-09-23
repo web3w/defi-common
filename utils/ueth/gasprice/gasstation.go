@@ -3,7 +3,7 @@ package gasprice
 import (
 	"encoding/json"
 	"fmt"
-	"git.bibox.com/dextop/common.git/utils/utime"
+	"github.com/gisvr/deif-common/utils/utime"
 	"io/ioutil"
 	"math/big"
 	"net/http"

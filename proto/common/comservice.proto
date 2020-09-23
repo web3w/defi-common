@@ -4,10 +4,10 @@ syntax = "proto3";
 
 package com;
 
-option go_package = "git.bibox.com/dextop/common.git/proto/common";
+option go_package = "github.com/gisvr/deif-common/proto/common";
 
 import "google/api/annotations.proto";
-import "git.bibox.com/dextop/common.git/proto/dex2fe/dfedata.proto";
+import "github.com/gisvr/deif-common/proto/dex2fe/dfedata.proto";
 
 service CommonService {
 

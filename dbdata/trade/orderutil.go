@@ -1,7 +1,7 @@
 package dbtrade
 
 import (
-	"git.bibox.com/dextop/common.git/utils/ulog"
+	"github.com/gisvr/deif-common/utils/ulog"
 	"strings"
 )
 
