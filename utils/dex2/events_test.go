@@ -8,7 +8,7 @@ import (
 
 func TestDeployMarketEventTopic(t *testing.T) {
 	for _, event := range Dex2Abi.Events {
-		id := event.Id()
+		id := event.ID()
 		if id == DeployMarketEventTopic {
 			return
 		}
